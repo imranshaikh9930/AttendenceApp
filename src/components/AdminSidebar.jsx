@@ -23,6 +23,7 @@ import {
 
 import { useLocation } from "react-router-dom";
 import { SidebarContext } from "../context/SidebarContextProvider";
+import SidebarDropdown from "./SidebarDropdown";
 // import SidebarDropdown from "./SidebarDropdown";
 
 const Sidebar = () => {
@@ -102,7 +103,27 @@ const Sidebar = () => {
             <LockKeyhole />
             {open && <span>Change Password</span>}
           </NavLink>
+          {/* <NavLink
+            to="/admin/employe"
+            className={navClass}
+            ${isActive("/") ? "bg-white text-[#1e9afe]" : "text-white hover:bg-blue-200"}
+          >
+            <LockKeyhole />
+            {open && <span>Employess</span>}
+          </NavLink> */}
 
+ {/* Books Dropdown */}
+ <SidebarDropdown
+            icon={Book}
+            label="Employees"
+            openSidebar={open}
+            activeBasePath="/employee"
+            items={[
+              { label: "Employee", path: "/admin/employees" },
+              { label: "Add Employee", path: "/employee/add" },
+              
+            ]}
+          />
           <NavLink
             to="/admin/attendance"
             
@@ -132,18 +153,7 @@ const Sidebar = () => {
             {open && <span>Help</span>}
           </NavLink>
 
-          {/* Books Dropdown */}
-          {/* <SidebarDropdown
-            icon={Book}
-            label="Books"
-            openSidebar={open}
-            activeBasePath="/books"
-            items={[
-              { label: "Book List", path: "/books" },
-              { label: "Add Book", path: "/books/add" },
-              { label: "Categories", path: "/books/categories" }
-            ]}
-          /> */}
+         
 
           {/* Authors Dropdown */}
           {/* <SidebarDropdown

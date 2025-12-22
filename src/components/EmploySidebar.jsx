@@ -2,6 +2,9 @@ import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
 import { IoMdSettings } from "react-icons/io";
 import { IoIosHelpCircle } from "react-icons/io";
+import { MdOutlineHolidayVillage } from "react-icons/md";
+import { SlCalender } from "react-icons/sl";
+
 import { House, LockKeyhole, BookAIcon } from "lucide-react";
 
 const EmploySidebar = () => {
@@ -23,7 +26,7 @@ const EmploySidebar = () => {
       {/* Header */}
       <button
         onClick={() => setOpen(!open)}
-        className="p-4 font-semibold text-center"
+        className="p-4 text-black self-center text-xl tracking-wide font-semibold shadow-lg bg-opacity-15"
       >
         {open ? "Employee Attendance" : <BookAIcon />}
       </button>
@@ -43,17 +46,26 @@ const EmploySidebar = () => {
 
         <NavLink to="/employee/attendance" className={navClass}>
           <LockKeyhole />
-          {open && <span>Attendance</span>}
+          {open && <span>My Attendance</span>}
         </NavLink>
 
+        <NavLink to="/employee/leaves" className={navClass}>
+          <SlCalender size={20} />
+          {open && <span>My Leaves</span>}
+        </NavLink>
+
+        <NavLink to="/employee/profile" className={navClass}>
+          <MdOutlineHolidayVillage size={20} />
+          {open && <span>My Profile</span>}
+        </NavLink>
+
+        <NavLink to="/employee/holidays" className={navClass}>
+          <MdOutlineHolidayVillage size={20} />
+          {open && <span>Holidays</span>}
+        </NavLink>
         <NavLink to="/employee/settings" className={navClass}>
           <IoMdSettings size={20} />
           {open && <span>Settings</span>}
-        </NavLink>
-
-        <NavLink to="/employee/help" className={navClass}>
-          <IoIosHelpCircle size={20} />
-          {open && <span>Help</span>}
         </NavLink>
 
       </nav>

@@ -130,19 +130,19 @@ const Attendence = () => {
       
       
     const tableHeader = [
-        "Sr.No","EmpId","Employee Name","Department","Date","Check In","Check Out","Status","Working Hours",
-        "Expected Hours"
+        "Sr.No","EmpId","Employee Name","Date","Check In","Check Out","Status",
+        "Expected Hours","Actual Working Hours",
     ]
 
 
     const singleEmpHeader = [
-      "EmpId","Emp.Name","Department","Date","Status","Current WHR","Expected Hours"
+      "EmpId","Emp.Name","Date","Status","Current WHR","Expected Hours"
     ]
     const singleEmp = [
       {
         empId:23005,
         empName:"John",
-        department:"IT",
+        // department:"IT",
         date:"20-12-2025",
         status:"Present",
         currentHR:8.5,
@@ -158,6 +158,9 @@ const Attendence = () => {
       <Typography className="text-white py-2 text-2xl text-center">
        Attendence
       </Typography>
+      
+    </div>
+    <h1 className='text-xl py-4 '> Current Date : 22-12-2025</h1>
     {
       role != "admin" && 
     <Table dummyAttendenceData= {dummyAttendenceData} tableHeaderData={tableHeader}/>
@@ -166,7 +169,7 @@ const Attendence = () => {
       role == "admin" && 
     <Table dummyAttendenceData= {singleEmp} tableHeaderData={singleEmpHeader}/>
     }
-    </div>
+    
 
 
    

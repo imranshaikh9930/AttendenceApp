@@ -11,7 +11,9 @@ const Settings = () => {
       <Typography className="text-white py-2 text-2xl text-center">
        Settings
       </Typography>
+
     </div>
+      <h1 className='text-3xl  w-full flex items-center  justify-center h-[80vh]'>Page Under Process......</h1>
 
 
    

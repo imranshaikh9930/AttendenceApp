@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 
-const Cards = ({ AdmincardData = [], EmploycardData = [] }) => {
+const Cards = ({ AdmincardData = [], EmploycardData = [], }) => {
 
   const [role, setRole] = useState(
     localStorage.getItem("role") || "employee"
@@ -75,6 +75,8 @@ const Cards = ({ AdmincardData = [], EmploycardData = [] }) => {
             )}
           </div>
         ))}
+
+        
     </div>
   );
 };

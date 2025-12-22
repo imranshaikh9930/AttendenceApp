@@ -58,9 +58,9 @@ const Table = ({dummyAttendenceData,tableHeaderData}) => {
         {row.name}
       </td>
 
-      <td className="border px-4 py-5 whitespace-nowrap text-gray-600 text-[16px]">
+      {/* <td className="border px-4 py-5 whitespace-nowrap text-gray-600 text-[16px]">
         {row.department}
-      </td>
+      </td> */}
       <td className="border px-4 py-5 whitespace-nowrap text-gray-600 text-[16px]">
         {row.date}
       </td>
@@ -87,11 +87,12 @@ const Table = ({dummyAttendenceData,tableHeaderData}) => {
           {row.status}
         </span>
       </td>
-      <td className="border px-4 py-5 whitespace-nowrap text-gray-600 text-[16px]">
-        {row.workingHours}
-      </td>
+    
       <td className="border px-4 py-5 whitespace-nowrap text-gray-600 text-[16px]">
         {row.expectedWHR}
+      </td>
+      <td className="border px-4 py-5 whitespace-nowrap text-gray-600 text-[16px]">
+        {row.workingHours}
       </td>
     </tr>
   ))}
@@ -150,10 +151,10 @@ const Table = ({dummyAttendenceData,tableHeaderData}) => {
       <td className="border px-4 py-5 whitespace-nowrap text-gray-600 text-[16px]">
         {row.empName}
       </td>
-
+{/* 
       <td className="border px-4 py-5 whitespace-nowrap text-gray-600 text-[16px]">
         {row.department}
-      </td>
+      </td> */}
 
       <td className="border px-4 py-5 whitespace-nowrap text-gray-600 text-[16px]">
         {row.date}

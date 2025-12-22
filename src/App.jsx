@@ -8,6 +8,11 @@ import ChangePassword from './pages/ChangePassword';
 import Attendence from "./pages/Attendence";
 import Settings from './pages/Settings';
 import Help from './pages/Help';
+import Login from './components/Login';
+import Holidays from './pages/Holidays';
+import Profile from './pages/Profile';
+import Employelist from './components/Employelist';
+import Leaves from './pages/Leaves';
 function App() {
   const [count, setCount] = useState(0)
 
@@ -18,6 +23,7 @@ function App() {
       <Router>
   <Routes>
 
+    <Route path="/" element={<Login/>}/>
     {/* ADMIN DASHBOARD */}
     <Route path="/admin" element={<Adminlayout />}>
       <Route index element={<Overview />} />
@@ -25,14 +31,17 @@ function App() {
       <Route path="attendance" element={<Attendence />} />
       <Route path="settings" element={<Settings />} />
       <Route path="help" element={<Help />} />
+      <Route path="employees" element={<Employelist/>}/>
     </Route>
 
     {/* EMPLOYEE DASHBOARD */}
     <Route path="/employee" element={<Employlayout />}>
       <Route index element={<Overview />} />
-      <Route path="change-password" element={<ChangePassword />} />
+      <Route path="settings" element={<Settings />} />
       <Route path="attendance" element={<Attendence />} />
-      <Route path="help" element={<Help />} />
+      <Route path="holidays" element={<Holidays />} />
+      <Route path="profile" element={<Profile />} />
+      <Route path="leaves" element={<Leaves />} />
     </Route>
 
   </Routes>
