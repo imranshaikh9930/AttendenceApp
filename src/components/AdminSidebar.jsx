@@ -24,6 +24,7 @@ import {
 import { useLocation } from "react-router-dom";
 import { SidebarContext } from "../context/SidebarContextProvider";
 import SidebarDropdown from "./SidebarDropdown";
+import { SlCalender } from "react-icons/sl";
 // import SidebarDropdown from "./SidebarDropdown";
 
 const Sidebar = () => {
@@ -133,7 +134,10 @@ const Sidebar = () => {
             <LockKeyhole />
             {open && <span>Attendence</span>}
           </NavLink>
-
+          <NavLink to="/admin/leaves" className={navClass}>
+                        <SlCalender size={20} />
+                        {open && <span>Leave Requests </span>}
+              </NavLink>
           <NavLink
             to="/admin/settings"
             className={navClass}
@@ -143,7 +147,7 @@ const Sidebar = () => {
             {open && <span>Settings</span>}
           </NavLink>
 
-
+              
           <NavLink
             to="/admin/help"
             className={navClass}

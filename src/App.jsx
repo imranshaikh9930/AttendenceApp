@@ -12,7 +12,8 @@ import Login from './components/Login';
 import Holidays from './pages/Holidays';
 import Profile from './pages/Profile';
 import Employelist from './components/Employelist';
-import Leaves from './pages/Leaves';
+import Employleaves from './pages/Employleaves';
+import Adminleaves from './pages/Adminleaves';
 function App() {
   const [count, setCount] = useState(0)
 
@@ -32,6 +33,7 @@ function App() {
       <Route path="settings" element={<Settings />} />
       <Route path="help" element={<Help />} />
       <Route path="employees" element={<Employelist/>}/>
+      <Route path="leaves" element={<Adminleaves />} />
     </Route>
 
     {/* EMPLOYEE DASHBOARD */}
@@ -41,7 +43,7 @@ function App() {
       <Route path="attendance" element={<Attendence />} />
       <Route path="holidays" element={<Holidays />} />
       <Route path="profile" element={<Profile />} />
-      <Route path="leaves" element={<Leaves />} />
+      <Route path="leaves" element={<Employleaves />} />
     </Route>
 
   </Routes>

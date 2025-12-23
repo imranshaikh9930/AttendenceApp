@@ -49,10 +49,7 @@ const EmploySidebar = () => {
           {open && <span>My Attendance</span>}
         </NavLink>
 
-        <NavLink to="/employee/leaves" className={navClass}>
-          <SlCalender size={20} />
-          {open && <span>My Leaves</span>}
-        </NavLink>
+        
 
         <NavLink to="/employee/profile" className={navClass}>
           <MdOutlineHolidayVillage size={20} />
@@ -63,6 +60,12 @@ const EmploySidebar = () => {
           <MdOutlineHolidayVillage size={20} />
           {open && <span>Holidays</span>}
         </NavLink>
+
+        <NavLink to="/employee/leaves" className={navClass}>
+          <SlCalender size={20} />
+          {open && <span>Request Leaves</span>}
+        </NavLink>
+        
         <NavLink to="/employee/settings" className={navClass}>
           <IoMdSettings size={20} />
           {open && <span>Settings</span>}

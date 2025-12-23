@@ -1,6 +1,7 @@
 import { Typography } from '@mui/material'
 import React from 'react'
 import Table from '../components/Table';
+import Filters from '../components/Filters';
 
 const Attendence = () => {
 
@@ -160,7 +161,12 @@ const Attendence = () => {
       </Typography>
       
     </div>
-    <h1 className='text-xl py-4 '> Current Date : 22-12-2025</h1>
+    
+      {/* Filter Component */}
+  <div className='sticky top-0 z-50 w-full bg-[#4f565b] mt-1 rounded-lg'>
+
+<Filters/>
+</div>
     {
       role != "admin" && 
     <Table dummyAttendenceData= {dummyAttendenceData} tableHeaderData={tableHeader}/>

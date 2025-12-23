@@ -20,7 +20,7 @@ const Cards = ({ AdmincardData = [], EmploycardData = [], }) => {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
 
-      {/* ================= ADMIN CARDS ================= */}
+      {/*ADMIN CARDS  */}
       {role === "employee" &&
         AdmincardData.map((data) => (
           <div
@@ -45,7 +45,7 @@ const Cards = ({ AdmincardData = [], EmploycardData = [], }) => {
           </div>
         ))}
 
-      {/* ================= EMPLOYEE CARDS ================= */}
+      {/* EMPLOYEE CARDS */}
       {role === "admin" &&
         EmploycardData.map((data) => (
           <div

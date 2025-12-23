@@ -6,11 +6,23 @@ import { useNavigate } from 'react-router-dom';
 
 const Navbar = () => {
   const [open,setOpen] = useState(false);
+  const [date,setDate] = useState(null);
   // const { open, setOpen } = useContext(SidebarContext);
   const navigate = useNavigate();
 
 
-  
+  useEffect(()=>{
+
+    const today = new Date();
+  const formattedDate = today.toLocaleDateString("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric"
+  });
+  setDate(formattedDate)
+  },[])
+
+
   const handleSwitch = () => {
     const newRole =
       localStorage.getItem("role") === "admin" ? "employee" : "admin";
@@ -45,7 +57,7 @@ const Navbar = () => {
 
           {/* Current Date & Time */}
      
-
+          <h1 className='text-md py-2  rounded-lg text-gray-500 px-2'> {date}</h1>
           {/* userProfile */}
           <Avatar alt="Avatar" src={avatarImg} />
          {/* Dropdown */}
