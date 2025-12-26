@@ -1,33 +1,19 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 
-const Cards = ({ AdmincardData = [], EmploycardData = [], }) => {
-
-  const [role, setRole] = useState(
-    localStorage.getItem("role") || "employee"
-  );
-
-  useEffect(() => {
-    const handleRoleChange = () => {
-      setRole(localStorage.getItem("role") || "employee");
-    };
-    window.addEventListener("role-change", handleRoleChange);
-
-    return () => {
-      window.removeEventListener("role-change", handleRoleChange);
-    };
-  }, []);
+const Cards = ({ AdmincardData = [], EmploycardData = [] }) => {
+  const role = localStorage.getItem("role") || "employee";
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
 
-      {/*ADMIN CARDS  */}
-      {role === "employee" &&
+      {/* ADMIN VIEW → Admin Cards */}
+      {role === "admin" &&
         AdmincardData.map((data) => (
           <div
             key={data.id}
-            className="w-full min-h-[120px] rounded-xl bg-white border
-              border-gray-200 p-5 shadow-sm flex flex-col justify-between
-              transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
+            className="w-full min-h-[120px] rounded-xl bg-white border border-gray-200
+                       p-5 shadow-sm flex flex-col justify-between
+                       transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
           >
             <div className="flex items-center gap-4">
               <div
@@ -45,14 +31,14 @@ const Cards = ({ AdmincardData = [], EmploycardData = [], }) => {
           </div>
         ))}
 
-      {/* EMPLOYEE CARDS */}
-      {role === "admin" &&
+      {/* EMPLOYEE VIEW → Employee Cards */}
+      {role !== "admin" &&
         EmploycardData.map((data) => (
           <div
             key={data.id}
-            className="w-full min-h-[120px] rounded-xl bg-white border
-              border-gray-200 p-5 shadow-sm flex flex-col justify-between
-              transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
+            className="w-full min-h-[120px] rounded-xl bg-white border border-gray-200
+                       p-5 shadow-sm flex flex-col justify-between
+                       transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
           >
             <div className="flex items-center gap-4">
               <div
@@ -75,8 +61,6 @@ const Cards = ({ AdmincardData = [], EmploycardData = [], }) => {
             )}
           </div>
         ))}
-
-        
     </div>
   );
 };

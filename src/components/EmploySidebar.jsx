@@ -4,6 +4,7 @@ import { IoMdSettings } from "react-icons/io";
 import { IoIosHelpCircle } from "react-icons/io";
 import { MdOutlineHolidayVillage } from "react-icons/md";
 import { SlCalender } from "react-icons/sl";
+import { CgProfile } from "react-icons/cg";
 
 import { House, LockKeyhole, BookAIcon } from "lucide-react";
 
@@ -12,11 +13,10 @@ const EmploySidebar = () => {
 
   const navClass = ({ isActive }) =>
     `flex items-center gap-3 px-4 py-2 rounded transition border
-     ${
-       isActive
-         ? "bg-[#222F7D] text-white"
-         : "text-black hover:bg-[#222F7D] hover:text-white border-[#dbdbdb]"
-     }`;
+     ${isActive
+      ? "bg-[#222F7D] text-white"
+      : "text-black hover:bg-[#222F7D] hover:text-white border-[#dbdbdb]"
+    }`;
 
   return (
     <aside
@@ -49,10 +49,11 @@ const EmploySidebar = () => {
           {open && <span>My Attendance</span>}
         </NavLink>
 
-        
+
+
 
         <NavLink to="/employee/profile" className={navClass}>
-          <MdOutlineHolidayVillage size={20} />
+          <CgProfile size={20} />
           {open && <span>My Profile</span>}
         </NavLink>
 
@@ -65,7 +66,7 @@ const EmploySidebar = () => {
           <SlCalender size={20} />
           {open && <span>Request Leaves</span>}
         </NavLink>
-        
+
         <NavLink to="/employee/settings" className={navClass}>
           <IoMdSettings size={20} />
           {open && <span>Settings</span>}

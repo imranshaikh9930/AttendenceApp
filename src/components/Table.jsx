@@ -1,218 +1,92 @@
-import React from 'react'
+import React from "react";
 
-const Table = ({dummyAttendenceData,tableHeaderData}) => {
+const SortIcon = () => (
+  <svg
+    stroke="currentColor"
+    fill="currentColor"
+    strokeWidth="0"
+    viewBox="0 0 320 512"
+    height="1em"
+    width="1em"
+    className="ms-1 text-gray-400"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path d="M41 288h238c21.4 0 32.1 25.9 17 41L177 448c-9.4 9.4-24.6 9.4-33.9 0L24 329c-15.1-15.1-4.4-41 17-41zm255-105L177 64c-9.4-9.4-24.6-9.4-33.9 0L24 183c-15.1 15.1-4.4 41 17 41h238c21.4 0 32.1-25.9 17-41z" />
+  </svg>
+);
 
-      const role = localStorage.getItem("role");
+const StatusBadge = ({ status }) => {
+  const styles =
+    status === "Present"
+      ? "bg-green-300 text-green-900"
+      : status === "Late"
+      ? "bg-yellow-100 text-yellow-700"
+      : "bg-red-100 text-red-700";
+
+  return (
+    <span className={`px-2 py-1 rounded text-sm font-medium ${styles}`}>
+      {status}
+    </span>
+  );
+};
+
+const Table = ({ data = [], headers = [], role = "employee" }) => {
   return (
     <div className="overflow-auto w-full border border-gray-300 rounded-sm max-h-[500px]">
-      {
-        role != "admin" && 
-    <table className="min-w-max w-full border-collapse text-sm">
+      <table className="min-w-max w-full border-collapse text-sm">
+        {/* HEADER */}
+        <thead className="bg-gray-100 sticky top-0 z-10">
+          <tr>
+            {headers.map((h, i) => (
+              <th key={i} className="border px-4 py-3 font-semibold whitespace-nowrap">
+                <div className="flex items-center gap-1">
+                  {h}
+                  <SortIcon />
+                </div>
+              </th>
+            ))}
+          </tr>
+        </thead>
 
-      <thead className="bg-gray-100">
-        <tr>
-          {tableHeaderData.map((data, index) => (
-            <th
-              key={index}
-              className="border px-4 py-3 font-semibold whitespace-nowrap"
+        {/* BODY */}
+        <tbody>
+          {data.map((row, i) => (
+            <tr
+              key={row.id || i}
+              className={`${i % 2 === 0 ? "bg-white" : "bg-gray-50"} hover:bg-gray-100`}
             >
-              <div className="flex items-center gap-1">
-                {data}
-
-                <svg
-                  stroke="currentColor"
-                  fill="currentColor"
-                  strokeWidth="0"
-                  viewBox="0 0 320 512"
-                  className="ms-1"
-                  height="1em"
-                  width="1em"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path d="M41 288h238c21.4 0 32.1 25.9 17 41L177 448c-9.4 9.4-24.6 9.4-33.9 0L24 329c-15.1-15.1-4.4-41 17-41zm255-105L177 64c-9.4-9.4-24.6-9.4-33.9 0L24 183c-15.1 15.1-4.4 41 17 41h238c21.4 0 32.1-25.9 17-41z"></path>
-                </svg>
-              </div>
-            </th>
+              {role === "admin" ? (
+                <>
+                  <td className="border px-4 py-4">{row.id}</td>
+                  <td className="border px-4 py-4">{row.EmpId}</td>
+                  <td className="border px-4 py-4">{row.name}</td>
+                  <td className="border px-4 py-4">{row.date}</td>
+                  <td className="border px-4 py-4">{row.checkIn}</td>
+                  <td className="border px-4 py-4">{row.checkOut}</td>
+                  <td className="border px-4 py-4">
+                    <StatusBadge status={row.status} />
+                  </td>
+                  <td className="border px-4 py-4">{row.expectedWHR}</td>
+                  <td className="border px-4 py-4">{row.workingHours}</td>
+                </>
+              ) : (
+                <>
+                  <td className="border px-4 py-4">{row.empId}</td>
+                  <td className="border px-4 py-4">{row.empName}</td>
+                  <td className="border px-4 py-4">{row.date}</td>
+                  <td className="border px-4 py-4">
+                    <StatusBadge status={row.status} />
+                  </td>
+                  <td className="border px-4 py-4">{row.currentHR}</td>
+                  <td className="border px-4 py-4">{row.expectedHr}</td>
+                </>
+              )}
+            </tr>
           ))}
-        </tr>
+        </tbody>
+      </table>
+    </div>
+  );
+};
 
-      </thead>
-
-      
-
-      <tbody>
-  {dummyAttendenceData.map((row, i) => (
-    <tr
-      key={row.id}
-      className={`${i % 2 === 0 ? "bg-white" : "bg-gray-50"} hover:bg-gray-100`}
-    >
-
-<td className="border px-4 py-5 whitespace-nowrap text-gray-600 text-[16px]">
-        {row.id}
-      </td>
-      <td className="border px-4 py-5 whitespace-nowrap text-gray-600 text-[16px]">
-        {row.EmpId}
-      </td>
-
-      <td className="border px-4 py-5 whitespace-nowrap text-gray-600 text-[16px]">
-        {row.name}
-      </td>
-
-      {/* <td className="border px-4 py-5 whitespace-nowrap text-gray-600 text-[16px]">
-        {row.department}
-      </td> */}
-      <td className="border px-4 py-5 whitespace-nowrap text-gray-600 text-[16px]">
-        {row.date}
-      </td>
-
-      <td className="border px-4 py-5 whitespace-nowrap text-gray-600 text-[16px]">
-        {row.checkIn}
-      </td>
-
-      <td className="border px-4 py-5 whitespace-nowrap text-gray-600 text-[16px]">
-        {row.checkOut}
-      </td>
-
-      <td className="border px-4 py-5 whitespace-nowrap text-gray-600 text-[16px]">
-        <span
-          className={`px-2 py-1 rounded text-sm font-medium
-            ${
-              row.status === "Present"
-                ? "bg-green-100 text-green-700"
-                : row.status === "Late"
-                ? "bg-yellow-100 text-yellow-700"
-                : "bg-red-100 text-red-700"
-            }`}
-        >
-          {row.status}
-        </span>
-      </td>
-    
-      <td className="border px-4 py-5 whitespace-nowrap text-gray-600 text-[16px]">
-        {row.expectedWHR}
-      </td>
-      <td className="border px-4 py-5 whitespace-nowrap text-gray-600 text-[16px]">
-        {row.workingHours}
-      </td>
-    </tr>
-  ))}
-</tbody>
-
-      
-
-    </table>
-      }
-
-      {
-        role == "admin" && 
-        <table className="min-w-max w-full border-collapse text-sm">
-
-      <thead className="bg-gray-100">
-        <tr>
-          {tableHeaderData.map((data, index) => (
-            <th
-              key={index}
-              className="border px-4 py-3 font-semibold whitespace-nowrap"
-            >
-              <div className="flex items-center gap-1">
-                {data}
-
-                <svg
-                  stroke="currentColor"
-                  fill="currentColor"
-                  strokeWidth="0"
-                  viewBox="0 0 320 512"
-                  className="ms-1"
-                  height="1em"
-                  width="1em"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path d="M41 288h238c21.4 0 32.1 25.9 17 41L177 448c-9.4 9.4-24.6 9.4-33.9 0L24 329c-15.1-15.1-4.4-41 17-41zm255-105L177 64c-9.4-9.4-24.6-9.4-33.9 0L24 183c-15.1 15.1-4.4 41 17 41h238c21.4 0 32.1-25.9 17-41z"></path>
-                </svg>
-              </div>
-            </th>
-          ))}
-        </tr>
-
-      </thead>
-
-      
-
-      <tbody>
-  {dummyAttendenceData.map((row, i) => (
-    <tr
-      key={row.id}
-      className={`${i % 2 === 0 ? "bg-white" : "bg-gray-50"} hover:bg-gray-100`}
-    >
-
-<td className="border px-4 py-5 whitespace-nowrap text-gray-600 text-[16px]">
-        {row.empId}
-      </td>
-      <td className="border px-4 py-5 whitespace-nowrap text-gray-600 text-[16px]">
-        {row.empName}
-      </td>
-{/* 
-      <td className="border px-4 py-5 whitespace-nowrap text-gray-600 text-[16px]">
-        {row.department}
-      </td> */}
-
-      <td className="border px-4 py-5 whitespace-nowrap text-gray-600 text-[16px]">
-        {row.date}
-      </td>
-      <td className="border px-4 py-5 whitespace-nowrap text-gray-600 text-[16px]">
-      <span
-          className={`px-2 py-1 rounded text-sm font-medium
-            ${
-              row.status === "Present"
-                ? "bg-green-100 text-green-700"
-                : row.status === "Late"
-                ? "bg-yellow-100 text-yellow-700"
-                : "bg-red-100 text-red-700"
-            }`}
-        >
-          {row.status}
-        </span>
-      </td>
-
-      <td className="border px-4 py-5 whitespace-nowrap text-gray-600 text-[16px]">
-        {row.currentHR}
-      </td>
-
-      <td className="border px-4 py-5 whitespace-nowrap text-gray-600 text-[16px]">
-        {row.expectedHr}
-      </td>
-
-      {/* <td className="border px-4 py-5 whitespace-nowrap text-gray-600 text-[16px]">
-        <span
-          className={`px-2 py-1 rounded text-sm font-medium
-            ${
-              row.status === "Present"
-                ? "bg-green-100 text-green-700"
-                : row.status === "Late"
-                ? "bg-yellow-100 text-yellow-700"
-                : "bg-red-100 text-red-700"
-            }`}
-        >
-          {row.status}
-        </span>
-      </td>
-      <td className="border px-4 py-5 whitespace-nowrap text-gray-600 text-[16px]">
-        {row.workingHours}
-      </td>
-      <td className="border px-4 py-5 whitespace-nowrap text-gray-600 text-[16px]">
-        {row.expectedWHR}
-      </td> */}
-    </tr>
-  ))}
-</tbody>
-
-      
-
-    </table>
-      }
-  </div>
-
-  )
-}
-
-export default Table
+export default Table;

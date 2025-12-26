@@ -116,7 +116,7 @@ const Adminleaves = () => {
         >
           <p className="flex items-center gap-1.5">
             <FaRegClock />
-            <span>Pending Request</span>
+            <span>Pending Leaves</span>
           </p>
 
           {pendingCount > 0 && (
@@ -137,7 +137,7 @@ const Adminleaves = () => {
             }`}
         >
           <TfiMenuAlt />
-          <span>All Request</span>
+          <span>All Leaves</span>
         </div>
 
         {/* Leave Balance */}

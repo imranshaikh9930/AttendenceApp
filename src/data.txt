@@ -1,0 +1,76 @@
+First Name
+
+Last Name
+
+Gender
+
+Date of Birth
+
+Blood Group
+
+Marital Status
+
+Nationality
+
+Personal Email
+
+Personal Phone
+
+Address (Current & Permanent)
+
+Emergency Contact Name
+
+Emergency Contact Number
+
+Relationship
+
+
+EDUCATION
+
+Degree / Qualification
+(B.Tech, MCA, MBA, Diploma, etc.)
+
+Field of Study
+
+University / College
+
+Location
+
+Start Year
+
+End Year
+
+Grade / CGPA / Percentage
+
+Mode (Full-time / Part-time / Distance)
+
+
+EXPERIENCE 
+
+Company Name
+
+Job Title / Designation
+
+Employment Type
+(Full Time / Contract / Internship)
+
+Start Date
+
+End Date (or “Present”)
+
+Responsibilities / Summary
+
+Location
+
+Skill Fields
+
+Skill Name
+(React, Java, SQL, Communication, Leadership)
+
+Skill Type
+(Technical / Soft Skill / Language)
+
+Proficiency Level
+(Beginner / Intermediate / Advanced / Expert)
+
+Years of Experience (optional)
