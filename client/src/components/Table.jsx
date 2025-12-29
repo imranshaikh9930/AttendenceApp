@@ -18,7 +18,7 @@ const SortIcon = () => (
 const StatusBadge = ({ status }) => {
   const styles =
     status === "Present"
-      ? "bg-green-300 text-green-900"
+      ? "bg-green-600 text-white"
       : status === "Late"
       ? "bg-yellow-100 text-yellow-700"
       : "bg-red-100 text-red-700";

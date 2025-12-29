@@ -9,7 +9,7 @@ const statusColors = {
     leave: "bg-yellow-400",
 };
 
-const Calendar = ({ data = [] }) => {
+const HolidayCalendar = ({ data = [] }) => {
     return (
         <div className="bg-white border rounded-xl p-6 shadow-sm max-w-3xl ">
             {/* <h2 className="text-lg font-semibold mb-6">Holiday Calendar </h2> */}
@@ -81,4 +81,4 @@ const Calendar = ({ data = [] }) => {
     );
 };
 
-export default Calendar;
+export default HolidayCalendar;

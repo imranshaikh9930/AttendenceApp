@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 
 import Adminlayout from "./layout/Adminlayout";
 import Employlayout from "./layout/EmployLayout";
@@ -16,31 +16,45 @@ import Employleaves from "./pages/Employleaves";
 import Adminleaves from "./pages/Adminleaves";
 
 import ProtectedRoute from "./routes/ProtectedRoute";
+import AdminRoute from "./routes/AdminRoute";
 import Register from "./components/Register";
 import NotFound from "./pages/NotFound";
 
 function App() {
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+
   return (
     <Router>
       <Routes>
-        {/* PUBLIC */}
-        <Route path="/" element={<Login />} />
-        <Route path="/register" element={<Register/>}/>
 
-        {/* ADMIN PROTECTED */}
-        <Route element={<ProtectedRoute allowedRole="admin" />}>
+        {/* PUBLIC ROUTES */}
+        <Route
+          path="/"
+          element={
+            user?.user === "admin"
+              ? <Navigate to="/admin" />
+              : user?.user === "employee"
+              ? <Navigate to="/employee" />
+              : <Login />
+          }
+        />
+
+        <Route path="/register" element={<Register />} />
+
+        {/* ADMIN ROUTES */}
+        <Route element={<AdminRoute allowedRole="admin" />}>
           <Route path="/admin" element={<Adminlayout />}>
             <Route index element={<Overview />} />
-            <Route path="change-password" element={<ChangePassword />} />
             <Route path="attendance" element={<Attendence />} />
-            <Route path="settings" element={<Settings />} />
-            <Route path="help" element={<Help />} />
             <Route path="employees" element={<Employelist />} />
             <Route path="leaves" element={<Adminleaves />} />
+            <Route path="change-password" element={<ChangePassword />} />
+            <Route path="settings" element={<Settings />} />
+            <Route path="help" element={<Help />} />
           </Route>
         </Route>
 
-        {/* EMPLOYEE PROTECTED */}
+        {/* EMPLOYEE ROUTES */}
         <Route element={<ProtectedRoute allowedRole="employee" />}>
           <Route path="/employee" element={<Employlayout />}>
             <Route index element={<Overview />} />
@@ -52,9 +66,9 @@ function App() {
           </Route>
         </Route>
 
-        {/* Not Found */}
+        {/* FALLBACK */}
+        <Route path="*" element={<NotFound />} />
 
-        <Route path="*" element={<NotFound/>}/>
       </Routes>
     </Router>
   );

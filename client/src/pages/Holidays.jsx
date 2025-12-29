@@ -3,6 +3,7 @@ import React from 'react'
 import YearCalendar from '../components/Yearcalender'
 import { CalendarRange } from 'lucide-react';
 import Calendar from '../components/Calender';
+import HolidayCalendar from '../components/HolidayCalender';
 
 const Holidays = () => {
     const holidays = [
@@ -148,7 +149,7 @@ const Holidays = () => {
 
               <h1 className='place-self-start bg-[#222f7d] mt-4 text-white rounded-lg px-3 py-2 text-xl '>Total Holidays :- {timelineData.length}</h1>
             <div className='w-full flex items-center justify-center'>
-          <Calendar  data={timelineData}/>
+          <HolidayCalendar  data={timelineData}/>
             </div>
     
     

@@ -64,7 +64,7 @@ const EmploySidebar = () => {
 
         <NavLink to="/employee/leaves" className={navClass}>
           <SlCalender size={20} />
-          {open && <span>Request Leaves</span>}
+          {open && <span>My Leaves</span>}
         </NavLink>
 
         <NavLink to="/employee/settings" className={navClass}>

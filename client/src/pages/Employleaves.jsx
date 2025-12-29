@@ -24,8 +24,8 @@ const Employleaves = () => {
 
 
   const leaveTableData = [
-    {id:1,request:"17/10/2025",period:"20/10/2025",Days:3,Type:"Annual",status:"Approved",Reason:"Shaadi Me Jana Hain",approvedby:"Ryan"},
-    {id:2,request:"08/04/2025",period:"09/04/2025",Days:1,Type:"Casual",status:"pending",Reason:"Bimar Hu Bhai...",approvedby:"Nick"},
+    {id:1,request:"17/10/2025",period:"20/10/2025",Days:3,Type:"Annual",status:"Approved",Reason:"Leave For Wedding",approvedby:"Ryan"},
+    {id:2,request:"08/04/2025",period:"09/04/2025",Days:1,Type:"Casual",status:"pending",Reason:"Feeling Not Well",approvedby:"Nick"},
     
 
   ]

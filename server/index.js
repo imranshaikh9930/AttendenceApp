@@ -1,0 +1,77 @@
+const express = require("express");
+const cors = require("cors");
+const ZKLib = require("zklib-js");
+const {Client} = require("pg");
+const {connectDB} = require("./db/connectDB");
+const userRoutes = require("./routes/user.routes");
+const employRoutes = require("./routes/employ.routes");
+require("dotenv").config();
+
+const app = express();
+
+
+
+const PORT = process.env.PORT || 5500;
+
+
+app.use(express.json());
+app.use(cors());
+
+app.use("/attendance",userRoutes);
+app.use("/employee-dashboard",employRoutes);
+
+app.listen(PORT,()=>{
+
+    console.log(`Server Running on PORT ${PORT}`);
+    connectDB();
+
+})
+
+
+
+// (async () => {
+//   const zk = new ZKLib("192.168.0.10", 4370, 10000, 4000);
+
+//   try {
+//     await zk.createSocket();
+//     console.log("✅ Connected");
+
+//     // 🔑 VERY IMPORTANT
+//     await zk.enableDevice();
+//     console.log("✅ Device Enabled");
+
+//     const serial = await zk.getSerialNumber();
+//     console.log("📟 Serial:", serial);
+
+//     const attendance = await zk.getAttendances();
+
+//     console.log("📄 Attendance Data:");
+//     console.log(attendance);
+
+   
+//     await zk.disconnect();
+//   } catch (err) {
+//     console.error("❌ Error:", err.message);
+//   }
+// })();
+
+// setInterval(async () => {
+//   try {
+//     await zk.enableDevice(); // ALWAYS before fetch
+
+//     const logs = await zk.getAttendances();
+
+//     console.log("📥 Count:", logs?.data?.length || 0);
+
+//     if (!logs?.data?.length) return;
+
+//     for (const log of logs.data) {
+//       console.log("✅ Attendance:", log);
+//     }
+//   } catch (err) {
+//     console.error("❌ Fetch error:", err.message);
+//   }
+// }, 5000);
+
+
+  

@@ -2,6 +2,7 @@ import { Typography } from "@mui/material";
 import React from "react";
 import Table from "../components/Table";
 import Filters from "../components/Filters";
+import Calender from "../components/Calender"
 
 const Attendence = () => {
   const role = localStorage.getItem("role") || "employee";
@@ -12,8 +13,8 @@ const Attendence = () => {
     "EmpId",
     "Employee Name",
     "Date",
-    "Check In",
-    "Check Out",
+    "Punch In",
+    "Punch Out",
     "Status",
     "Expected Hours",
     "Actual Working Hours",
@@ -29,7 +30,7 @@ const Attendence = () => {
       checkOut: "06:10 PM",
       status: "Present",
       workingHours: 8,
-      expectedWHR: 9.5,
+      expectedWHR: 9,
     },
     {
       id: 2,
@@ -41,7 +42,7 @@ const Attendence = () => {
       checkOut: "06:00 PM",
       status: "Late",
       workingHours: 7,
-      expectedWHR: 9.5,
+      expectedWHR: 9,
     },
     {
       id: 3,
@@ -53,7 +54,7 @@ const Attendence = () => {
       checkOut: "--",
       status: "Absent",
       workingHours: 0,
-      expectedWHR: 9.5,
+      expectedWHR: 9,
     },
   ];
  
@@ -99,12 +100,19 @@ const Attendence = () => {
       }
 
       {/* Table */}
+      <div className=" ">
+
       <div className="mt-4">
         <Table
           role={role}
           data={role === "admin" ? allAttendanceData : singleEmployeeData}
           headers={role === "admin" ? adminTableHeader : employeeTableHeader}
         />
+      </div>
+      
+      {/* Calender */}
+
+      {/* <Calender/> */}
       </div>
 
     </div>

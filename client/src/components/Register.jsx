@@ -1,7 +1,36 @@
-import React from 'react'
-import { NavLink } from 'react-router-dom'
+import React,{useState} from 'react'
+import { NavLink,useNavigate } from 'react-router-dom'
+import { registerUser } from '../../services/authServices'
 
 const Register = () => {
+
+  const navigate = useNavigate();
+  
+  const [formData,setFormData] = useState({
+    name:"",
+    email:"",
+    password:"",
+    role:"employee"
+  })
+
+  const handleChange = (e)=>{
+
+    setFormData({...formData,[e.target.name]:e.target.value});
+  }
+
+  const handleSubmit = async(e)=>{
+    e.preventDefault();
+
+    try {
+
+      const resp = await registerUser(formData)
+      alert(resp.message);
+      navigate("/")
+
+    } catch (error) {
+      console.log(error);
+    }
+  }
   return (
     <section className="bg-gray-50 :bg-gray-900 min-h-screen flex items-center justify-center">
       <div className="w-full max-w-md bg-white :bg-gray-800 rounded-lg shadow-lg p-6 sm:p-8">
@@ -18,13 +47,16 @@ const Register = () => {
               Your Name
             </label>
             <input
-              type="email"
+              type="text"
+              name="name"
               placeholder="Enter Name"
               className="w-full p-2.5 rounded-lg border border-gray-300 
               bg-gray-50 text-gray-900
               focus:ring-2 focus:ring-blue-500 focus:outline-none
               :bg-gray-700 :border-gray-600 :text-white"
               required
+              value={formData.name}
+              onChange={handleChange}
             />
           </div>
           {/* Email */}
@@ -33,13 +65,16 @@ const Register = () => {
               Your email
             </label>
             <input
-              type="email"
+              type="text"
+              name="email"
               placeholder="name@company.com"
               className="w-full p-2.5 rounded-lg border border-gray-300 
               bg-gray-50 text-gray-900
               focus:ring-2 focus:ring-blue-500 focus:outline-none
               :bg-gray-700 :border-gray-600 :text-white"
               required
+              value={formData.email}
+              onChange={handleChange}
             />
           </div>
 
@@ -50,12 +85,15 @@ const Register = () => {
             </label>
             <input
               type="password"
+              name="password"
               placeholder="••••••••"
               className="w-full p-2.5 rounded-lg border border-gray-300 
               bg-gray-50 text-gray-900
               focus:ring-2 focus:ring-blue-500 focus:outline-none
               :bg-gray-700 :border-gray-600 :text-white"
               required
+              value={formData.password}
+              onChange={handleChange}
             />
           </div>
 
@@ -64,6 +102,8 @@ const Register = () => {
             type="submit"
             className="w-full bg-blue-600 hover:bg-blue-700 
             text-white font-medium rounded-lg py-2.5 transition"
+
+            onClick={handleSubmit}
           >
             Sign Up
           </button>
