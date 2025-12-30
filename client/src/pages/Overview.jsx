@@ -4,11 +4,8 @@ import Leavecards from "../components/Leavecards";
 import MonthlyHolidays from "../components/Monthlyholidays";
 import Cards from "../components/Cards";
 import profileImg from "../assets/avatar.webp";
-
-import {
-  IoPerson,
-  IoExitOutline,
-} from "react-icons/io5";
+import AttendanceDoughnutChart from "../charts/Doughnut";
+import { IoPerson, IoExitOutline } from "react-icons/io5";
 import { MdOutlineCoPresent } from "react-icons/md";
 import { BsFillPersonXFill } from "react-icons/bs";
 import { TbClockX } from "react-icons/tb";
@@ -16,10 +13,12 @@ import { FaUserClock } from "react-icons/fa6";
 import { SlCalender } from "react-icons/sl";
 
 const Overview = () => {
-  const user = JSON.parse(localStorage.getItem("user") || "{}");
-  const isAdmin = user?.role === "admin";
 
-  /* ---------- Admin Cards ---------- */
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const role = user?.role?.toLowerCase()?.trim();
+  const isAdmin = role === "admin";
+
+
   const adminData = [
     { id: 1, title: "Total Employees", total: 15, icon: <IoPerson />, bgColor: "#222f7d" },
     { id: 2, title: "Present Today", total: 9, icon: <MdOutlineCoPresent />, bgColor: "#27F598" },
@@ -28,7 +27,6 @@ const Overview = () => {
     { id: 5, title: "On Leave", total: 2, icon: <FaUserClock />, bgColor: "#FACC15" }
   ];
 
-  /* ---------- Employee Cards ---------- */
   const empData = [
     {
       id: 1,
@@ -62,6 +60,13 @@ const Overview = () => {
     { id: 3, title: "Leaves Allowed", value: 15, icon: <SlCalender />, bgColor: "#e60707" }
   ];
 
+  const holidayList = [
+    { id: 1, name: "Christmas Day", date: "25 Dec 2025", month: "December" },
+    { id: 2, name: "New Year’s Day", date: "01 Jan 2026", month: "January" },
+    { id: 3, name: "Makar Sankranti / Pongal", date: "14 Jan 2026", month: "January" },
+    { id: 4, name: "Republic Day", date: "26 Jan 2026", month: "January" }
+  ];
+
   return (
     <div className="p-4 bg-gray-50 min-h-screen">
 
@@ -75,7 +80,7 @@ const Overview = () => {
       {/* Main Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
 
-        {/* LEFT */}
+        {/* Left Section */}
         <div className="lg:col-span-3 space-y-6">
           <Cards
             AdmincardData={adminData}
@@ -91,50 +96,57 @@ const Overview = () => {
           )}
         </div>
 
-        {/* RIGHT */}
+        {/* Right Profile (Employee Only) */}
         {!isAdmin && (
-  <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
-    
-    {/* Header Strip */}
-    <div className="h-20 bg-gradient-to-r from-[#222F7D] to-[#4f63d2]" />
+          <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
 
-    {/* Profile Image */}
-    <div className="-mt-12 flex justify-center">
-      <img
-        src={profileImg}
-        alt="profile"
-        className="w-24 h-24 rounded-full border-4 border-white shadow-md object-cover"
-      />
-    </div>
+            <div className="h-20 bg-gradient-to-r from-[#222F7D] to-[#4f63d2]" />
 
-    {/* User Info */}
-    <div className="px-6 pb-6 pt-3 text-center">
-      <h3 className="text-lg font-semibold text-gray-800">
-        {user?.name}
-      </h3>
+            <div className="-mt-12 flex justify-center">
+              <img
+                src={profileImg}
+                alt="profile"
+                className="w-24 h-24 rounded-full border-4 border-white shadow-md object-cover"
+              />
+            </div>
 
-      <span className="inline-block mt-1 px-3 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-700">
-        {user?.role}
-      </span>
+            <div className="px-6 pb-6 pt-3 text-center">
+              <h3 className="text-lg font-semibold text-gray-800">
+                {user?.name}
+              </h3>
 
-      {/* Divider */}
-      <div className="border-t my-4" />
+              <span className="inline-block mt-1 px-3 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-700">
+                {role}
+              </span>
 
-      {/* Details */}
-      <div className="text-sm text-gray-600 space-y-2 text-left">
-        <div className="flex justify-between">
-          <span className="font-medium">Employee ID</span>
-          <span className="text-gray-800">EMP-00{user?.id}</span>
-        </div>
+              <div className="border-t my-4" />
 
-        <div className="flex justify-between">
-          <span className="font-medium">Email</span>
-          <span className="text-gray-800 truncate">{user?.email}</span>
-        </div>
-      </div>
-    </div>
-  </div>
-)}
+              <div className="text-sm text-gray-600 space-y-2 text-left">
+                <div className="flex justify-between">
+                  <span className="font-medium">Employee ID</span>
+                  <span className="text-gray-800">EMP-00{user?.id}</span>
+                </div>
+
+                <div className="flex justify-between">
+                  <span className="font-medium">Email</span>
+                  <span className="text-gray-800 truncate">{user?.email}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {isAdmin && (
+          <div className="bg-white rounded-xl shadow-xl p-4 h-auto flex flex-col">
+            <h2 className="text-lg font-semibold mb-4">Statistics</h2>
+
+            <div className="flex-1 flex items-center justify-center">
+              <AttendanceDoughnutChart
+                cardData={adminData}
+              />
+            </div>
+          </div>
+        )}
 
       </div>
 
@@ -167,7 +179,7 @@ const Overview = () => {
       {/* Employee Holidays */}
       {!isAdmin && (
         <div className="mt-6">
-          <MonthlyHolidays />
+          <MonthlyHolidays holidays={holidayList} />
         </div>
       )}
     </div>

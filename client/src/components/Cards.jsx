@@ -1,7 +1,9 @@
 import React from "react";
 
 const Cards = ({ AdmincardData = [], EmploycardData = [] }) => {
-  const role = localStorage.getItem("role") || "employee";
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const role = user?.role?.toLowerCase()?.trim();
+  const isAdmin = role === "admin";
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">

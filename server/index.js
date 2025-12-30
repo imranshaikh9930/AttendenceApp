@@ -2,9 +2,10 @@ const express = require("express");
 const cors = require("cors");
 const ZKLib = require("zklib-js");
 const {Client} = require("pg");
-const {connectDB} = require("./db/connectDB");
+const {connectDB,db} = require("./db/connectDB");
 const userRoutes = require("./routes/user.routes");
 const employRoutes = require("./routes/employ.routes");
+const attendanceRoutes = require("./routes/attendance.routes")
 require("dotenv").config();
 
 const app = express();
@@ -19,6 +20,7 @@ app.use(cors());
 
 app.use("/attendance",userRoutes);
 app.use("/employee-dashboard",employRoutes);
+app.use("/api/attendance", attendanceRoutes);
 
 app.listen(PORT,()=>{
 

@@ -23,10 +23,13 @@ const Login = () => {
     try {
       const resp = await loginUser(formData);
       alert(resp.message);
-      console.log("User:", resp.user);
+      console.log("User:", resp.user.role);
 
       if(resp.user.role === "employee"){
         navigate("/employee");
+      }
+      else{
+        navigate("/admin")
       }
     } catch (err) {
       console.log(err);

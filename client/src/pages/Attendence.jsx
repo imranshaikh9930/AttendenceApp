@@ -5,7 +5,9 @@ import Filters from "../components/Filters";
 import Calender from "../components/Calender"
 
 const Attendence = () => {
-  const role = localStorage.getItem("role") || "employee";
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const role = user?.role?.toLowerCase()?.trim();
+  const isAdmin = role === "admin";
 
   // Admin 
   const adminTableHeader = [
