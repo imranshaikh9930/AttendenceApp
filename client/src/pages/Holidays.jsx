@@ -1,6 +1,6 @@
 import { Typography } from '@mui/material'
 import React from 'react'
-import YearCalendar from '../components/Yearcalender'
+import YearCalendar from '../components/YearCalender'
 import { CalendarRange } from 'lucide-react';
 import Calendar from '../components/Calender';
 import HolidayCalendar from '../components/HolidayCalender';
