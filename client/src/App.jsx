@@ -1,7 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 
 import Adminlayout from "./layout/Adminlayout";
-import Employlayout from "./layout/EmployLayout";
 
 import Overview from "./pages/Overview";
 import ChangePassword from "./pages/ChangePassword";
@@ -19,6 +18,7 @@ import ProtectedRoute from "./routes/ProtectedRoute";
 import AdminRoute from "./routes/AdminRoute";
 import Register from "./components/Register";
 import NotFound from "./pages/NotFound";
+import Employlayout from "./layout/Employlayout";
 
 function App() {
   const user = JSON.parse(localStorage.getItem("user") || "{}");
