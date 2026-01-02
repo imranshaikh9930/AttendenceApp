@@ -3,8 +3,13 @@ const router = express.Router();
 const controller = require("../controllers/attendance.controller");
 const auth = require("../middlewares/authMiddleware");
 
+// Admin
+
 router.get("/sync", controller.syncAttendance);
-router.get("/today", controller.getTodayAttendance);
+
+
+// Today All Employ Attendance
+router.get("/today", controller.getTodayOrganizationAttendance);
 
 
 router.get("/me", auth, controller.getMyAttendance);

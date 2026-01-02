@@ -1,13 +1,13 @@
 const express = require("express");
 const auth = require("../middlewares/authMiddleware");
-
+const {getMyAttendance,getMyTodayAttendance} = require("../controllers/attendance.controller")
 
 const router = express.Router();
 
 function formatAttendance(rawLogs, employeeMap) {
     const grouped = {};
   
-    // 1️⃣ Group logs by deviceUserId
+    // 1Group logs by deviceUserId
     rawLogs.forEach(log => {
       const empId = log.deviceUserId;
       const time = new Date(log.recordTime);
@@ -19,7 +19,7 @@ function formatAttendance(rawLogs, employeeMap) {
       grouped[empId].push(time);
     });
   
-    // 2️⃣ Build UI response
+    // Build UI response
     const result = [];
   
     Object.keys(grouped).forEach(empId => {
@@ -39,17 +39,11 @@ function formatAttendance(rawLogs, employeeMap) {
 
 // Employ Punch In  &  Punch Out
 
-router.get("/",auth,async(req,res)=>{
-    try {
-        
-        return res.json({message:"Welcome to employee Route Protected"});
+router.get("/today",auth,getMyTodayAttendance)
 
-    } catch (error) {
-        res.status(500).json({messag:"Internal Server Error"});
-    }
-})
+// Employ all previous attendence view
 
-// Employ Own attendence view
+router.get("/history",auth,getMyAttendance);
 
 
 

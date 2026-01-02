@@ -11,14 +11,90 @@ import { BsFillPersonXFill } from "react-icons/bs";
 import { TbClockX } from "react-icons/tb";
 import { FaUserClock } from "react-icons/fa6";
 import { SlCalender } from "react-icons/sl";
+import { useContext } from "react";
+import { EmployContext } from "../context/EmployContextProvider";
+
 
 const Overview = () => {
+  const getTime = (dateTime) => {
+    if (!dateTime) return "--";
+  
+    // If already HH:MM
+    if (/^\d{2}:\d{2}$/.test(dateTime)) return dateTime;
+  
+    const date = new Date(dateTime);
+    if (isNaN(date.getTime())) return "--";
+  
+    return date.toLocaleTimeString("en-IN", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false, // change to true if you want AM/PM
+    });
+  };
+  
 
   const user = JSON.parse(localStorage.getItem("user") || "{}");
   const role = user?.role?.toLowerCase()?.trim();
   const isAdmin = role === "admin";
 
 
+  const { singleAttendance } = useContext(EmployContext);
+
+  // singleAttendance?.today?.punch_in
+  // singleAttendance?.today?.status
+  // singleAttendance?.weekly?.total_hours
+
+
+  
+
+// take latest attendance (already DESC from backend)
+// const latest = attendance.length > 0 ? attendance[0] : null;
+
+
+console.log(singleAttendance);
+const empCardData = singleAttendance
+  ? [
+      {
+        id: 1,
+        title: "Punch In",
+        value: singleAttendance.today?.punch_in
+          ? getTime(singleAttendance.today.punch_in)
+          : "--",
+        description: "In Time",
+        icon: <IoExitOutline />,
+        bgColor: "#22C55E",
+      },
+      {
+        id: 2,
+        title: "Punch Out",
+        value: singleAttendance.today?.punch_out
+          ? getTime(singleAttendance.today.punch_out)
+          : "Working...",
+        description: "Out Time",
+        icon: <IoExitOutline />,
+        bgColor: "#EF4444",
+      },
+      // {
+      //   id: 3,
+      //   title: "Today Hours",
+      //   value: singleAttendance.today?.total_hours || "00:00",
+      //   description: singleAttendance.today?.status,
+      //   icon: <TbClockX />,
+      //   bgColor: "#F59E0B",
+      // },
+      {
+        id: 3,
+        title: "Weekly Hours",
+        value: singleAttendance.weekly?.total_hours || "00:00",
+        description: "This Week",
+        icon: <FaUserClock />,
+        bgColor: "#6366F1",
+      },
+    ]
+  : [];
+
+
+  
   const adminData = [
     { id: 1, title: "Total Employees", total: 15, icon: <IoPerson />, bgColor: "#222f7d" },
     { id: 2, title: "Present Today", total: 9, icon: <MdOutlineCoPresent />, bgColor: "#27F598" },
@@ -27,32 +103,7 @@ const Overview = () => {
     { id: 5, title: "On Leave", total: 2, icon: <FaUserClock />, bgColor: "#FACC15" }
   ];
 
-  const empData = [
-    {
-      id: 1,
-      title: "Punch In",
-      value: "10:30 AM",
-      description: "In Time",
-      icon: <IoExitOutline />,
-      bgColor: "#32a852"
-    },
-    {
-      id: 2,
-      title: "Punch Out",
-      value: "6:30 PM",
-      description: "Out Time",
-      icon: <IoExitOutline />,
-      bgColor: "#e60707"
-    },
-    {
-      id: 3,
-      title: "Total Hours",
-      value: "8 Hours",
-      description: "Weekly Hours",
-      icon: <IoExitOutline />,
-      bgColor: "#e8970c"
-    }
-  ];
+  
 
   const leaveData = [
     { id: 1, title: "Total Leaves Taken", value: 5, icon: <SlCalender />, bgColor: "#32a852" },
@@ -84,7 +135,7 @@ const Overview = () => {
         <div className="lg:col-span-3 space-y-6">
           <Cards
             AdmincardData={adminData}
-            EmploycardData={empData}
+            EmploycardData={empCardData}
           />
 
           {/* Employee Leave Section */}
@@ -124,7 +175,8 @@ const Overview = () => {
               <div className="text-sm text-gray-600 space-y-2 text-left">
                 <div className="flex justify-between">
                   <span className="font-medium">Employee ID</span>
-                  <span className="text-gray-800">EMP-00{user?.id}</span>
+                  <span className="text-gray-800">EMP-{user?.device_user_id
+}</span>
                 </div>
 
                 <div className="flex justify-between">

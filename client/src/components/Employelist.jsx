@@ -1,9 +1,12 @@
-import React from 'react'
+import React, { useContext } from 'react'
+import { EmployContext } from '../context/EmployContextProvider';
 
 const Employelist = () => {
+ const { adminAttendance, loading } = useContext(EmployContext);
 
+ console.log(adminAttendance);
     const empHeader = [
-        "Empid","Emp.Name","Email","Role","Department","Status"
+        "Empid","Emp.Name","Email","Status"
     ]
     const employeesdata = [
         {
@@ -130,14 +133,14 @@ const Employelist = () => {
 
 
 <tbody>
-{employeesdata.map((row, i) => (
+{adminAttendance.map((row, i) => (
 <tr
 key={row.id}
 className={`${i % 2 === 0 ? "bg-white" : "bg-gray-50"} hover:bg-gray-100`}
 >
 
 <td className="border px-4 py-5 whitespace-nowrap text-gray-600 text-[16px]">
-  {row.id}
+  {row.device_user_id}
 </td>
 <td className="border px-4 py-5 whitespace-nowrap text-gray-600 text-[16px]">
   {row.name}
@@ -147,27 +150,20 @@ className={`${i % 2 === 0 ? "bg-white" : "bg-gray-50"} hover:bg-gray-100`}
   {row.email}
 </td>
 
-<td className="border px-4 py-5 whitespace-nowrap text-gray-600 text-[16px]">
-  {row.role}
-</td>
-<td className="border px-4 py-5 whitespace-nowrap text-gray-600 text-[16px]">
-  {row.department}
-</td>
 
 <td className="border px-4 py-5 whitespace-nowrap text-gray-600 text-[16px]">
-        <span
-          className={`px-2 py-1 rounded text-sm font-medium
-            ${
-              row.status === "Active"
-                ? "bg-green-100 text-green-700"
-                : row.status === "On Leave"
-                ? "bg-yellow-100 text-yellow-700"
-                : "bg-red-100 text-red-700"
-            }`}
-        >
-          {row.status}
-        </span>
-      </td>
+  <span
+    className={`px-3 py-1 rounded text-sm font-medium
+      ${
+        row.is_active
+          ? "bg-green-100 text-green-700"
+          : "bg-red-100 text-red-700"
+      }`}
+  >
+    {row.is_active ? "Active" : "Inactive"}
+  </span>
+</td>
+
 </tr>
 ))}
 </tbody>

@@ -6,6 +6,8 @@ const {connectDB,db} = require("./db/connectDB");
 const userRoutes = require("./routes/user.routes");
 const employRoutes = require("./routes/employ.routes");
 const attendanceRoutes = require("./routes/attendance.routes")
+const adminRoutes = require("./routes/admin.routes");
+// require("./cron/attendance.cron");
 require("dotenv").config();
 
 const app = express();
@@ -18,9 +20,16 @@ const PORT = process.env.PORT || 5500;
 app.use(express.json());
 app.use(cors());
 
-app.use("/attendance",userRoutes);
-app.use("/employee-dashboard",employRoutes);
-app.use("/api/attendance", attendanceRoutes);
+app.use("/api/auth",userRoutes);
+// app.use("/employee-dashboard",employRoutes);
+app.use("/api/employee/attendance", employRoutes);
+
+app.use("/api/admin/attendance", attendanceRoutes);
+// app.use("/admin-dashboard",adminRoutes)
+
+// cron.schedule("* * * * *", () => {
+//     console.log("Runs every minute");
+//   });
 
 app.listen(PORT,()=>{
 
