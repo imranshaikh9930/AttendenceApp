@@ -59,18 +59,18 @@ const loginController = async (req, res) => {
   try {
     let { email, password } = req.body;
 
-    // ✅ Basic validation
+    
     if (!email || !password) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
-    // ✅ Normalize
+    
     email = email.trim().toLowerCase();
     password = String(password).trim();
 
-    // ✅ Include device_user_id in query
+  
     const result = await db.query(
-      `SELECT id, name, email, password, role, device_user_id 
+      `SELECT id, name, email, password, role, emp_id 
        FROM users 
        WHERE email = $1`,
       [email]
@@ -82,25 +82,25 @@ const loginController = async (req, res) => {
 
     const user = result.rows[0];
 
-    // ✅ Compare password
+    
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
       return res.status(401).json({ message: "Invalid email or password" });
     }
 
-    // ✅ JWT payload (keep it minimal)
+    
     const token = jwt.sign(
       {
         id: user.id,
         role: user.role,
-        device_user_id: user.device_user_id
+        emp_id: user.emp_id
       },
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
 
-    // ✅ Response (never send password)
+  
     res.status(200).json({
       message: "Login successful",
       token,
@@ -109,7 +109,7 @@ const loginController = async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
-        device_user_id: user.device_user_id
+        emp_id: user.emp_id
       }
     });
 

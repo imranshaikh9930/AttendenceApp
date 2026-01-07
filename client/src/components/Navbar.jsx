@@ -1,93 +1,129 @@
 import React, { useEffect, useState } from "react";
-import { Menu } from "lucide-react";
-import { Avatar, Button } from "@mui/material";
+import { ChevronDown, Menu as MenuIcon } from "lucide-react";
+import {
+  Avatar,
+  Button,
+  Menu,
+  MenuItem,
+  Divider,
+  ListItemIcon,
+} from "@mui/material";
+import { Person, Logout } from "@mui/icons-material";
 import avatarImg from "../assets/avatar.webp";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-hot-toast";
 
-
-const Navbar = () => {
+const Navbar = ({open, setOpen }) => {
   const [date, setDate] = useState("");
+  const [anchorEl, setAnchorEl] = useState(null);
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("user"));
 
+  const openMenu = Boolean(anchorEl);
+
   useEffect(() => {
     const today = new Date();
-    const formattedDate = today.toLocaleDateString("en-IN", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    });
-    setDate(formattedDate);
+    setDate(
+      today.toLocaleDateString("en-IN", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      })
+    );
   }, []);
 
   const handleLogout = () => {
-    // const newRole =
-    //   localStorage.getItem("role") === "admin" ? "employee" : "admin";
-
-    // localStorage.setItem("role", newRole);
-    // navigate(newRole === "admin" ? "/employee" : "/admin");
-
+    localStorage.removeItem("token");
     localStorage.removeItem("user");
-    navigate("/")
+    toast.success("Logout Successfully");
+    navigate("/");
   };
 
-  const handleSidbarExpand = ()=>{
-    
-  }
   return (
     <header className="bg-white shadow px-4 py-3 flex items-center justify-between">
 
-      {/* LEFT: Menu */}
-      <button className="p-2 rounded hover:bg-gray-200/60">
-        <Menu size={26} onClick={handleSidbarExpand} />
+      {/* Hamburger */}
+      <button
+        className="p-2 rounded hover:bg-gray-200/60"
+      onClick={() => setOpen(!open)}
+      >
+        <MenuIcon size={26} />
       </button>
 
-      {/* CENTER: Title */}
-      <h1 className="text-lg md:text-2xl font-semibold text-center flex-1">
+      {/* Title */}
+      <h1 className="text-lg md:text-2xl font-semibold flex-1 text-center">
         Attendance
       </h1>
 
-      {/* RIGHT: User Actions */}
-      <div className="flex items-center gap-3 md:gap-4">
+      {/* Right Section */}
+      <div className="flex items-center gap-3 mr-4">
 
-        {/* Date (hidden on mobile) */}
+        {/* Date (desktop only) */}
         <span className="hidden md:block text-sm text-gray-500">
           {date}
         </span>
 
         {/* Avatar */}
-        <Avatar alt="Avatar" src={avatarImg} />
-        <div className="md:col-span-3">
-          <h2 className="text-md font-semibold">{user?.name}</h2>
-          {/* <p className="text-gray-600">{orgData.designation}</p> */}
+        <div
+  className="flex items-center gap-1 cursor-pointer select-none"
+  onClick={(e) => setAnchorEl(e.currentTarget)}
+>
+  <Avatar
+    src={avatarImg}
+    alt="Avatar"
+    className="w-8 h-8"
+  />
+  <ChevronDown
+    size={18}
+    className={`transition-transform duration-200 ${
+      openMenu ? "rotate-180" : ""
+    }`}
+  />
+</div>
 
-        
-        </div>
 
-        {/* <div className="bg-white rounded-xl shadow p-6 h-full flex flex-col">
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 items-center">
-        <img
-          src={avatarImg}
-          alt="profile"
-          className="w-32 h-32 rounded-full mx-auto border-4 border-[#222F7D] object-cover"
-        />
-
-      
-      </div>
-
-      {/* <Divider className="my-4" /> */}
-      <div className="flex-grow" />
-    {/* </div> */}
-
-        {/* Switch Role Button */}
-        <Button
-          variant="contained"
-          size="small"
-          onClick={handleLogout}
-          className="hidden sm:inline-flex"
+        {/* Dropdown Menu */}
+        <Menu
+          anchorEl={anchorEl}
+          open={openMenu}
+          onClose={() => setAnchorEl(null)}
+          anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+          transformOrigin={{ vertical: "top", horizontal: "right" }}
+          
         >
-          Logout
-        </Button>
+          {/* User Info */}
+          <div className="px-4 py-2">
+            <p className="font-semibold">{user?.name}</p>
+            <p className="text-sm text-gray-500">{user?.email}</p>
+          </div>
+
+          <Divider />
+
+          {/* My Profile */}
+          <MenuItem
+            onClick={() => {
+              navigate("/employee/profile");
+              setAnchorEl(null);
+            }}
+          >
+            <ListItemIcon>
+              <Person fontSize="small" />
+            </ListItemIcon>
+            My Profile
+          </MenuItem>
+
+          {/* Logout */}
+          <MenuItem
+            onClick={handleLogout}
+            className="text-red-600"
+          >
+            <ListItemIcon>
+              <Logout fontSize="small" color="error" />
+            </ListItemIcon>
+            Logout
+          </MenuItem>
+        </Menu>
+
       </div>
     </header>
   );

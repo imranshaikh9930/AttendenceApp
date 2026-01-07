@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { Typography, Divider } from "@mui/material";
 import profileImg from "../assets/avatar.webp";
 import { IoHomeSharp } from "react-icons/io5";
@@ -6,8 +6,12 @@ import { MdOutlineEmail } from "react-icons/md";
 import Input from "../components/Input";
 import Select from "../components/Select";
 import FormCard from "../components/FormCard";
+import { EmployContext } from "../context/EmployContextProvider";
 
 const Profile = () => {
+
+  const user = JSON.parse(localStorage.getItem("user"));
+  
   const tabs = [
     "Organization",
     "Personal Details",
@@ -15,6 +19,7 @@ const Profile = () => {
     "Experience",
     "Skills"
   ];
+  
 
   const [activeTab, setActiveTab] = useState("Organization");
   const [isEditing, setIsEditing] = useState(false);
@@ -135,8 +140,8 @@ const Profile = () => {
         />
 
         <div className="md:col-span-3">
-          <h2 className="text-xl font-semibold">John Doe</h2>
-          <p className="text-gray-600">{orgData.designation}</p>
+          <h2 className="text-xl font-semibold">{user?.name.toUpperCase()}</h2>
+          <p className="text-gray-600">{user?.role}</p>
 
           <div className="flex gap-6 mt-2 text-gray-600">
             <span className="flex items-center gap-1">

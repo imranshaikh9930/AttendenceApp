@@ -1,4 +1,4 @@
-import React, { createContext, useEffect, useState } from "react";
+import React, { createContext, useEffect, useState, useMemo } from "react";
 import axios from "axios";
 
 export const EmployContext = createContext();
@@ -8,114 +8,143 @@ const EmployProvider = ({ children }) => {
   const [employeeAttendance, setEmployeeAttendance] = useState([]);
   const [singleAttendance, setSingleAttendance] = useState(null);
   const [adminAttendance, setAdminAttendance] = useState([]);
-  const [loading, setLoading] = useState(false);
 
-  const token = localStorage.getItem("token");
-  const user = JSON.parse(localStorage.getItem("user") || "{}");
-  const role = user?.role?.toLowerCase();
+  const [employeeLoading, setEmployeeLoading] = useState(false);
+  const [adminLoading, setAdminLoading] = useState(false);
+  const [initialized, setInitialized] = useState(false);
 
-  const axiosConfig = {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  };
+  /* 🔥 AUTH STATE (THIS IS THE FIX) */
+  const [auth, setAuth] = useState(() => {
+    const token = localStorage.getItem("token");
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
 
-// Overview Of Single Employee
-  const fetchSingleAttendance = async () => {
+    return {
+      token,
+      role: user?.role?.toLowerCase() || null,
+    };
+  });
+
+  /* 🔥 LISTEN TO LOGIN / LOGOUT */
+  useEffect(() => {
+    const syncAuth = () => {
+      const token = localStorage.getItem("token");
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+
+      setAuth({
+        token,
+        role: user?.role?.toLowerCase() || null,
+      });
+    };
+
+    syncAuth(); // initial
+    window.addEventListener("storage", syncAuth);
+
+    return () => window.removeEventListener("storage", syncAuth);
+  }, []);
+
+  const axiosConfig = useMemo(
+    () => ({
+      headers: {
+        Authorization: `Bearer ${auth.token}`,
+      },
+    }),
+    [auth.token]
+  );
+
+  /* =======================
+     EMPLOYEE DASHBOARD
+  ======================== */
+  const fetchEmployeeDashboard = async () => {
     try {
-      setLoading(true);
+      setEmployeeLoading(true);
 
-      const res = await axios.get(
-        "http://localhost:5000/api/employee/attendance/today",
-        axiosConfig
-      );
+      const [historyRes, todayRes] = await Promise.all([
+        axios.get(
+          "http://localhost:5000/api/employee/attendance/history",
+          axiosConfig
+        ),
+        axios.get(
+          "http://localhost:5000/api/employee/attendance/today",
+          axiosConfig
+        ),
+      ]);
 
-      setSingleAttendance(res.data || null);
-    } catch (error) {
-      console.error("Single attendance fetch error:", error);
-      setSingleAttendance(null);
-    } finally {
-      setLoading(false);
-    }
-  };
-  /* employee previous attendance */
-  const fetchEmployeeAttendance = async () => {
-    try {
-      setLoading(true);
+      if (Array.isArray(historyRes.data)) {
+        setEmployeeAttendance(historyRes.data);
 
-      const res = await axios.get(
-        "http://localhost:5000/api/employee/attendance/history",
-        axiosConfig
-      );
-
-      if (Array.isArray(res.data)) {
-        setEmployeeAttendance(res.data);
-
-        // Store employee basic info
-        if (res.data.length > 0) {
+        if (historyRes.data.length > 0) {
           setEmployee({
-            emp_id: res.data[0].emp_id,
-            device_user_id: res.data[0].device_user_id,
-            name: res.data[0].name,
+            emp_id: historyRes.data[0].emp_id,
+            device_user_id: historyRes.data[0].device_user_id,
+            name: historyRes.data[0].name,
           });
         }
-      } else {
-        setEmployeeAttendance([]);
       }
-    } catch (error) {
-      console.error("Employee attendance fetch error:", error);
+
+      setSingleAttendance(todayRes.data || null);
+    } catch (err) {
+      console.error(err);
       setEmployeeAttendance([]);
+      setSingleAttendance(null);
     } finally {
-      setLoading(false);
+      setEmployeeLoading(false);
+      setInitialized(true);
     }
   };
 
-  /*  admin attendance -(All Emp) */
+  /* =======================
+     ADMIN DASHBOARD
+  ======================== */
   const fetchAdminAttendance = async () => {
     try {
-      setLoading(true);
+      setAdminLoading(true);
 
       const res = await axios.get(
         "http://localhost:5000/api/admin/attendance/today",
         axiosConfig
       );
 
-      console.log(res);
-      if (Array.isArray(res.data)) {
-        setAdminAttendance(res.data);
-      } else {
-        setAdminAttendance([]);
-      }
-    } catch (error) {
-      console.error("Admin attendance fetch error:", error);
+      setAdminAttendance(Array.isArray(res.data) ? res.data : []);
+    } catch (err) {
+      console.error(err);
       setAdminAttendance([]);
     } finally {
-      setLoading(false);
+      setAdminLoading(false);
+      setInitialized(true);
     }
   };
 
-  /*  INITIAL LOAD  */
+  /* =======================
+     FETCH ON AUTH CHANGE
+  ======================== */
   useEffect(() => {
-    if (!token || !role) return;
+    if (!auth.token || !auth.role) return;
 
-    if (role === "admin") {
+    setInitialized(false);
+
+    if (auth.role === "admin") {
       fetchAdminAttendance();
-    } else {
-      fetchEmployeeAttendance();
-      fetchSingleAttendance(); 
     }
-  }, [token, role]);
 
-  
+    if (auth.role === "employee") {
+      fetchEmployeeDashboard();
+    }
+  }, [auth.token, auth.role]);
+
+  const loading =
+    auth.role === "admin" ? adminLoading : employeeLoading;
+
   return (
     <EmployContext.Provider
       value={{
         employee,
         employeeAttendance,
+        singleAttendance,
         adminAttendance,
         loading,
-        singleAttendance,
-        refreshEmployeeAttendance: fetchEmployeeAttendance,
+        initialized,
+
+        refreshEmployeeDashboard: fetchEmployeeDashboard,
         refreshAdminAttendance: fetchAdminAttendance,
       }}
     >

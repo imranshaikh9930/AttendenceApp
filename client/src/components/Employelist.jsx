@@ -140,7 +140,7 @@ className={`${i % 2 === 0 ? "bg-white" : "bg-gray-50"} hover:bg-gray-100`}
 >
 
 <td className="border px-4 py-5 whitespace-nowrap text-gray-600 text-[16px]">
-  {row.device_user_id}
+  {row.emp_id}
 </td>
 <td className="border px-4 py-5 whitespace-nowrap text-gray-600 text-[16px]">
   {row.name}

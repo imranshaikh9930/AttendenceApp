@@ -1,47 +1,56 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { Toaster } from "react-hot-toast";
 
 import Adminlayout from "./layout/Adminlayout";
+import Employlayout from "./layout/Employlayout";
 
 import Overview from "./pages/Overview";
 import ChangePassword from "./pages/ChangePassword";
 import Attendence from "./pages/Attendence";
 import Settings from "./pages/Settings";
 import Help from "./pages/Help";
-import Login from "./components/Login";
 import Holidays from "./pages/Holidays";
 import Profile from "./pages/Profile";
-import Employelist from "./components/Employelist";
 import Employleaves from "./pages/Employleaves";
 import Adminleaves from "./pages/Adminleaves";
 
+import Login from "./components/Login";
+import Register from "./components/Register";
+import Employelist from "./components/Employelist";
+import NotFound from "./pages/NotFound";
+
 import ProtectedRoute from "./routes/ProtectedRoute";
 import AdminRoute from "./routes/AdminRoute";
-import Register from "./components/Register";
-import NotFound from "./pages/NotFound";
-import Employlayout from "./layout/Employlayout";
 
 function App() {
   const user = JSON.parse(localStorage.getItem("user") || "{}");
 
   return (
     <Router>
+      <Toaster />
       <Routes>
 
-        {/* PUBLIC ROUTES */}
+        {/* ROOT REDIRECT */}
         <Route
           path="/"
           element={
-            user?.user === "admin"
-              ? <Navigate to="/admin" />
-              : user?.user === "employee"
-              ? <Navigate to="/employee" />
-              : <Login />
+            !user?.role ? (
+              <Navigate to="/login" replace />
+            ) : user.role === "admin" ? (
+              <Navigate to="/admin" replace />
+            ) : user.role === "employee" ? (
+              <Navigate to="/employee" replace />
+            ) : (
+              <Navigate to="/login" replace />
+            )
           }
         />
 
-        <Route path="/register" element={<Register />} />
+        {/* PUBLIC */}
+        <Route path="/login" element={<Login />} />
+        {/* <Route path="/register" element={<Register />} /> */}
 
-        {/* ADMIN ROUTES */}
+        {/* ADMIN */}
         <Route element={<AdminRoute allowedRole="admin" />}>
           <Route path="/admin" element={<Adminlayout />}>
             <Route index element={<Overview />} />
@@ -54,7 +63,7 @@ function App() {
           </Route>
         </Route>
 
-        {/* EMPLOYEE ROUTES */}
+        {/* EMPLOYEE */}
         <Route element={<ProtectedRoute allowedRole="employee" />}>
           <Route path="/employee" element={<Employlayout />}>
             <Route index element={<Overview />} />

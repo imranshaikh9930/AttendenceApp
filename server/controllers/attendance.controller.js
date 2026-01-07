@@ -115,15 +115,37 @@ exports.generateDailyAttendance = async (req, res) => {
 
 exports.getTodayOrganizationAttendance = async (req, res) => {
   try {
-    /* -------------------------------------------------
-       🔹 IST DATE (single source of truth)
-    --------------------------------------------------*/
-    const istDateQuery = `(CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Kolkata')::DATE`;
-
-    /* -------------------------------------------------
-       1️⃣ UPSERT PRESENT / WORKING EMPLOYEES (ACTIVE ONLY)
-    --------------------------------------------------*/
     await db.query(`
+      WITH params AS (
+        SELECT
+          (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Kolkata')::DATE AS ist_date,
+          ((CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Kolkata')::DATE + TIME '10:30') AS punch_in_start,
+          ((CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Kolkata')::DATE + TIME '19:00') AS punch_out_start
+      ),
+
+      punch_calc AS (
+        SELECT
+          al.emp_id,
+          p.ist_date AS attendance_date,
+
+          -- First punch AFTER 10:30 AM
+          MIN(al.punch_time AT TIME ZONE 'Asia/Kolkata')
+            FILTER (
+              WHERE (al.punch_time AT TIME ZONE 'Asia/Kolkata') >= p.punch_in_start
+            ) AS punch_in,
+
+          -- First punch AT or AFTER 7:00 PM
+          MIN(al.punch_time AT TIME ZONE 'Asia/Kolkata')
+            FILTER (
+              WHERE (al.punch_time AT TIME ZONE 'Asia/Kolkata') >= p.punch_out_start
+            ) AS punch_out
+
+        FROM attendance_logs al
+        CROSS JOIN params p
+        WHERE (al.punch_time AT TIME ZONE 'Asia/Kolkata')::DATE = p.ist_date
+        GROUP BY al.emp_id, p.ist_date
+      )
+
       INSERT INTO daily_attendance (
         emp_id,
         attendance_date,
@@ -134,120 +156,88 @@ exports.getTodayOrganizationAttendance = async (req, res) => {
         status
       )
       SELECT
-        u.id AS emp_id,
-        ${istDateQuery} AS attendance_date,
-
-        MIN(al.punch_time) AS punch_in,
-
-        CASE
-          WHEN COUNT(al.punch_time) > 1 THEN MAX(al.punch_time)
-          ELSE NULL
-        END AS punch_out,
+        pc.emp_id,
+        pc.attendance_date,
+        pc.punch_in,
+        pc.punch_out,
 
         CASE
-          WHEN COUNT(al.punch_time) > 1
-            THEN MAX(al.punch_time) - MIN(al.punch_time)
+          WHEN pc.punch_in IS NOT NULL AND pc.punch_out IS NOT NULL
+          THEN pc.punch_out - pc.punch_in
           ELSE INTERVAL '0 minutes'
-        END AS total_hours,
+        END,
 
-        INTERVAL '9 hours' AS expected_hours,
+        INTERVAL '9 hours',
 
         CASE
-          WHEN COUNT(al.punch_time) = 1 THEN 'Working'
+          WHEN pc.punch_in IS NULL THEN 'Absent'
+          WHEN pc.punch_out IS NULL THEN 'Working'
           ELSE 'Present'
-        END AS status
+        END
 
-      FROM attendance_logs al
-      JOIN users u
-        ON u.device_user_id = al.device_user_id
-
-      WHERE (al.punch_time AT TIME ZONE 'Asia/Kolkata')::DATE = ${istDateQuery}
-        AND u.role = 'employee'
-        AND u.is_active = TRUE
-
-      GROUP BY u.id
+      FROM punch_calc pc
 
       ON CONFLICT (emp_id, attendance_date)
       DO UPDATE SET
-        punch_in = EXCLUDED.punch_in,
-        punch_out = EXCLUDED.punch_out,
+        punch_in    = EXCLUDED.punch_in,
+        punch_out   = EXCLUDED.punch_out,
         total_hours = EXCLUDED.total_hours,
-        status = EXCLUDED.status;
+        status      = EXCLUDED.status;
     `);
 
-    /* -------------------------------------------------
-       2️⃣ INSERT ABSENT EMPLOYEES (ACTIVE ONLY)
-    --------------------------------------------------*/
-    await db.query(`
-      INSERT INTO daily_attendance (
-        emp_id,
-        attendance_date,
-        total_hours,
-        expected_hours,
-        status
-      )
-      SELECT
-        u.id,
-        ${istDateQuery},
-        INTERVAL '0 minutes',
-        INTERVAL '9 hours',
-        'Absent'
-      FROM users u
-      LEFT JOIN attendance_logs al
-        ON u.device_user_id = al.device_user_id
-       AND (al.punch_time AT TIME ZONE 'Asia/Kolkata')::DATE = ${istDateQuery}
-
-      WHERE al.device_user_id IS NULL
-        AND u.role = 'employee'
-        AND u.is_active = TRUE
-
-      ON CONFLICT (emp_id, attendance_date)
-      DO NOTHING;
-    `);
-
-    /* -------------------------------------------------
-       3️⃣ FETCH TODAY ATTENDANCE (EMAIL + IS_ACTIVE)
-    --------------------------------------------------*/
+    /* -------- FETCH TODAY (IST) -------- */
     const { rows } = await db.query(`
       SELECT
-        u.id AS emp_id,
-        u.device_user_id,
+        u.emp_id,
         u.name,
         u.email,
         u.is_active,
 
-        ${istDateQuery} AS attendance_date,
+        TO_CHAR(
+          (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Kolkata')::DATE,
+          'YYYY-MM-DD'
+        ) AS attendance_date,
 
         a.punch_in,
         a.punch_out,
-
         COALESCE(a.total_hours, INTERVAL '0 minutes') AS total_hours,
         COALESCE(a.expected_hours, INTERVAL '9 hours') AS expected_hours,
 
         CASE
           WHEN u.is_active = FALSE THEN 'Inactive'
-          WHEN a.status = 'Absent' THEN 'Absent'
-          WHEN a.punch_out IS NULL THEN 'Present'
-          ELSE 'Present'
+          WHEN a.emp_id IS NULL THEN 'Absent'
+          ELSE a.status
         END AS status
 
       FROM users u
       LEFT JOIN daily_attendance a
-        ON a.emp_id = u.id
-       AND a.attendance_date = ${istDateQuery}
+        ON a.emp_id = u.emp_id
+       AND a.attendance_date =
+         (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Kolkata')::DATE
 
       WHERE u.role = 'employee'
       ORDER BY u.name;
     `);
 
-    return res.status(200).json(rows);
+    res.status(200).json(rows);
+
   } catch (error) {
     console.error("❌ Attendance fetch error:", error);
-    return res
-      .status(500)
-      .json({ message: "Failed to fetch today's attendance" });
+    res.status(500).json({ message: "Failed to fetch today's attendance" });
   }
 };
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -305,87 +295,107 @@ exports.getTodayOrganizationAttendance = async (req, res) => {
 // single Emp Attendance
 
 
+
+
 exports.getMyTodayAttendance = async (req, res) => {
   try {
-    const deviceUserId = req.user.device_user_id;
+    const empId = req.user.emp_id;
 
-    /* ================= TODAY ATTENDANCE ================= */
+    /* -------------------------------------------------
+       TODAY ATTENDANCE (IST)
+    --------------------------------------------------*/
     const todayResult = await db.query(
       `
       SELECT
-        MIN(punch_time) AS punch_in,
-        MAX(punch_time) AS punch_out,
-        COUNT(*)::int AS punch_count
-      FROM attendance_logs
-      WHERE device_user_id = $1
-        AND (punch_time AT TIME ZONE 'Asia/Kolkata')::DATE =
-            (NOW() AT TIME ZONE 'Asia/Kolkata')::DATE
+        punch_in,
+        punch_out,
+        total_hours,
+        status
+      FROM daily_attendance
+      WHERE emp_id = $1
+        AND attendance_date =
+          (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Kolkata')::DATE
+      LIMIT 1
       `,
-      [deviceUserId]
+      [empId]
     );
 
-    const today = todayResult.rows[0];
+    const today = todayResult.rows[0] || null;
 
-    let todayPunchIn = null;
-    let todayPunchOut = null;
+    /* ---------- Convert INTERVAL → HH:MM ---------- */
     let todayHours = "00:00";
-    let todayStatus = "Absent";
 
-    if (today && today.punch_in) {
-      todayPunchIn = today.punch_in;
+    if (today?.total_hours) {
+      const secRes = await db.query(
+        `SELECT EXTRACT(EPOCH FROM $1::interval) AS seconds`,
+        [today.total_hours]
+      );
 
-      if (today.punch_count === 1) {
-        todayStatus = "Working";
-      } else {
-        todayPunchOut = today.punch_out;
-        todayStatus = "Present";
+      const secs = Number(secRes.rows[0].seconds);
+      const hrs = Math.floor(secs / 3600);
+      const mins = Math.floor((secs % 3600) / 60);
 
-        const ms = new Date(todayPunchOut) - new Date(todayPunchIn);
-        const mins = Math.floor(ms / (1000 * 60));
-        todayHours = `${String(Math.floor(mins / 60)).padStart(2, "0")}:${String(mins % 60).padStart(2, "0")}`;
-      }
+      todayHours = `${String(hrs).padStart(2, "0")}:${String(mins).padStart(
+        2,
+        "0"
+      )}`;
     }
 
-    /* ================= WEEKLY TOTAL HOURS ================= */
+    /* -------------------------------------------------
+       WEEKLY HOURS (MONDAY → TODAY, IST)
+       Present → total_hours
+       Working → NOW - punch_in
+    --------------------------------------------------*/
     const weeklyResult = await db.query(
       `
       WITH daily AS (
         SELECT
+          emp_id,
           (punch_time AT TIME ZONE 'Asia/Kolkata')::DATE AS attendance_date,
-          MIN(punch_time) AS punch_in,
-          MAX(punch_time) AS punch_out
+          MIN(punch_time AT TIME ZONE 'Asia/Kolkata') AS punch_in,
+          MAX(punch_time AT TIME ZONE 'Asia/Kolkata') AS punch_out
         FROM attendance_logs
-        WHERE device_user_id = $1
+        WHERE emp_id = $1
           AND (punch_time AT TIME ZONE 'Asia/Kolkata')::DATE >=
-              DATE_TRUNC('week', NOW() AT TIME ZONE 'Asia/Kolkata')
-        GROUP BY attendance_date
+              DATE_TRUNC(
+                'week',
+                (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Kolkata')
+              )::DATE
+        GROUP BY emp_id, attendance_date
       )
       SELECT
-        SUM(EXTRACT(EPOCH FROM (punch_out - punch_in))) AS total_seconds
+        COALESCE(
+          SUM(EXTRACT(EPOCH FROM (punch_out - punch_in))),
+          0
+        ) AS total_seconds
       FROM daily
       WHERE punch_in IS NOT NULL
         AND punch_out IS NOT NULL
       `,
-      [deviceUserId]
+      [empId]
     );
+    
 
-    const totalSeconds = Number(weeklyResult.rows[0]?.total_seconds || 0);
-    const totalMinutes = Math.floor(totalSeconds / 60);
-    const weeklyHours = `${String(Math.floor(totalMinutes / 60)).padStart(2, "0")}:${String(totalMinutes % 60).padStart(2, "0")}`;
+    const weeklySeconds = Number(weeklyResult.rows[0].total_seconds);
+    const weeklyHrs = Math.floor(weeklySeconds / 3600);
+    const weeklyMins = Math.floor((weeklySeconds % 3600) / 60);
 
-    /* ================= RESPONSE ================= */
+    /* -------------------------------------------------
+       RESPONSE
+    --------------------------------------------------*/
     res.json({
       today: {
-        punch_in: todayPunchIn,   // ISO → frontend formats
-        punch_out: todayPunchOut,
+        punch_in: today?.punch_in ?? null,
+        punch_out: today?.punch_out ?? null,
         total_hours: todayHours,
-        status: todayStatus,
+        status: today?.status ?? "Absent",
       },
       weekly: {
-        total_hours: weeklyHours,
+        total_hours: `${String(weeklyHrs).padStart(2, "0")}:${String(
+          weeklyMins
+        ).padStart(2, "0")}`,
       },
     });
-
   } catch (err) {
     console.error("❌ getMyTodayAttendance error:", err);
     res.status(500).json({ message: "Server error" });
@@ -394,92 +404,125 @@ exports.getMyTodayAttendance = async (req, res) => {
 
 
 
+
+
+
+
+
+
+
 // /*  Employee – All  attendance */ 
 exports.getMyAttendance = async (req, res) => {
   try {
-    const deviceUserId = req.user.device_user_id;
+    const empId = req.user.emp_id;
 
     const { rows } = await db.query(
       `
+      WITH dates AS (
+        SELECT generate_series(
+          (CURRENT_DATE AT TIME ZONE 'Asia/Kolkata') - INTERVAL '29 days',
+          (CURRENT_DATE AT TIME ZONE 'Asia/Kolkata'),
+          INTERVAL '1 day'
+        )::DATE AS attendance_date
+      ),
+
+      daily_punches AS (
+        SELECT
+          al.emp_id,
+          (al.punch_time AT TIME ZONE 'Asia/Kolkata')::DATE AS attendance_date,
+          COUNT(*) AS punch_count,
+          MIN(al.punch_time AT TIME ZONE 'Asia/Kolkata') AS punch_in,
+          MAX(al.punch_time AT TIME ZONE 'Asia/Kolkata') AS punch_out
+        FROM attendance_logs al
+        WHERE al.emp_id = $1
+        GROUP BY al.emp_id, attendance_date
+      )
+
       SELECT
-        u.device_user_id,
+        u.emp_id,
         u.name AS employee_name,
+        TO_CHAR(d.attendance_date, 'YYYY-MM-DD') AS attendance_date,
 
-        -- Attendance date in IST (DATE only)
-        (al.punch_time AT TIME ZONE 'Asia/Kolkata')::DATE AS attendance_date,
+        dp.punch_in,
+        dp.punch_out,
 
-        COUNT(*) AS punch_count,
+        -- ✅ total worked seconds (SAFE)
+        CASE
+          WHEN dp.punch_in IS NOT NULL
+           AND dp.punch_out IS NOT NULL
+           AND dp.punch_out > dp.punch_in
+          THEN EXTRACT(EPOCH FROM (dp.punch_out - dp.punch_in))
+          ELSE 0
+        END AS total_seconds,
 
-        MIN(al.punch_time) AS punch_in,
-        MAX(al.punch_time) AS punch_out
+        CASE
+          WHEN dp.punch_in IS NULL THEN 'Absent'
+          WHEN dp.punch_out IS NULL THEN 'Working'
+          WHEN dp.punch_in = dp.punch_out THEN 'Working'
+          ELSE 'Present'
+        END AS status
 
-      FROM attendance_logs al
-      JOIN users u
-        ON u.device_user_id = al.device_user_id
+      FROM users u
+      CROSS JOIN dates d
+      LEFT JOIN daily_punches dp
+        ON dp.emp_id = u.emp_id
+       AND dp.attendance_date = d.attendance_date
 
-      WHERE al.device_user_id = $1
-
-      GROUP BY
-        u.device_user_id,
-        u.name,
-        (al.punch_time AT TIME ZONE 'Asia/Kolkata')::DATE
-
-      ORDER BY attendance_date DESC
+      WHERE u.emp_id = $1
+      ORDER BY d.attendance_date DESC
       `,
-      [deviceUserId]
+      [empId]
     );
 
-    // 🔹 Today's date in IST (YYYY-MM-DD)
-    const todayIST = new Date()
-      .toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" });
+    /* ---------- seconds → HH:MM (CARRY SAFE) ---------- */
+    const formattedRows = rows.map(r => {
+      const totalSeconds = Number(r.total_seconds || 0);
 
-    const formatted = rows.map((row) => {
-      const attendanceDate = row.attendance_date
-        .toISOString()
-        .slice(0, 10);
+      // convert to total minutes first
+      let totalMinutes = Math.floor(totalSeconds / 60);
 
-      const isToday = attendanceDate === todayIST;
+      let hours = Math.floor(totalMinutes / 60);
+      let minutes = totalMinutes % 60;
 
-      // Only one punch today → still working
-      if (isToday && Number(row.punch_count) === 1) {
-        return {
-          device_user_id: row.device_user_id,
-          name: row.employee_name,
-          attendance_date: attendanceDate,
-
-          punch_in: row.punch_in,   // ISO → frontend formats
-          punch_out: null,
-
-          status: "Working",
-          current_working_hours: "00:00",
-        };
+      // 🔁 safety carry (never exceed 59)
+      if (minutes >= 60) {
+        hours += Math.floor(minutes / 60);
+        minutes = minutes % 60;
       }
 
-      // 🔹 Completed day
-      const workingHours =
-        row.punch_in && row.punch_out
-          ? calculateHours(row.punch_in, row.punch_out) // HH:MM
-          : "00:00";
-
       return {
-        device_user_id: row.device_user_id,
-        name: row.employee_name,
-        attendance_date: attendanceDate,
-
-        punch_in: row.punch_in,
-        punch_out: row.punch_out,
-
-        status: "Present",
-        current_working_hours: workingHours,
+        ...r,
+        total_hours: `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`,
       };
     });
 
-    res.json(formatted);
+    res.status(200).json(formattedRows);
+
   } catch (err) {
-    console.error(" getMyAttendance error:", err);
+    console.error("❌ getMyAttendance error:", err);
     res.status(500).json({ message: "Server error" });
   }
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

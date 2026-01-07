@@ -38,11 +38,11 @@ async function getDeviceAttendance() {
   const zk = new ZKLib("192.168.0.10", 4370, 10000, 4000);
 
   try {
-    console.log(" Connecting to device...");
+    console.log("🔌 Connecting to device...");
     await zk.createSocket();
     await zk.enableDevice();
 
-    console.log(" Fetching attendance logs...");
+    console.log("📥 Fetching attendance logs...");
     const logs = await zk.getAttendances();
 
     if (!logs?.data?.length) {
@@ -54,38 +54,51 @@ async function getDeviceAttendance() {
       const punchTime = normalizePunchTime(log.recordTime);
       if (!punchTime) continue;
 
+      // 🔁 TEMP: deviceUserId == emp_id
+      const { rows } = await db.query(
+        `SELECT emp_id FROM users WHERE emp_id = $1`,
+        [String(log.deviceUserId)]
+      );
+
+      if (!rows.length) {
+        console.warn(`Unknown device user: ${log.deviceUserId}`);
+        continue;
+      }
+
+      const empId = rows[0].emp_id;
+
       await db.query(
         `
         INSERT INTO attendance_logs
-        (device_user_id, punch_time, device_ip, device_sn)
+          (emp_id, punch_time, device_ip, device_sn)
         VALUES ($1, $2, $3, $4)
-        ON CONFLICT (device_user_id, punch_time) DO NOTHING
+        ON CONFLICT (emp_id, punch_time) DO NOTHING
         `,
         [
-          String(log.deviceUserId),
+          empId,
           punchTime,
           log.ip || null,
           "EUF7251400009"
         ]
       );
-      
     }
 
-    console.log(`Synced ${logs.data.length} logs`);
+    console.log(`✅ Synced ${logs.data.length} logs`);
     return logs.data;
 
   } catch (err) {
-    console.error("Attendance sync error:", err.message);
+    console.error("❌ Attendance sync error FULL:", err);
     throw err;
   } finally {
     try {
       await zk.disconnect();
-      console.log("Device disconnected");
+      console.log("🔌 Device disconnected");
     } catch {
-      console.warn("Device disconnect failed");
+      console.warn("⚠ Device disconnect failed");
     }
   }
 }
+
 
 module.exports = {
   getDeviceAttendance

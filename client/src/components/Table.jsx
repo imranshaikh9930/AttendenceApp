@@ -1,7 +1,8 @@
 import React, { useContext } from "react";
 import { EmployContext } from "../context/EmployContextProvider";
+import Loader from "./Loader";
 
-/* ---------- STATUS ---------- */
+/* ---------- STATUS BADGE ---------- */
 const StatusBadge = ({ status }) => {
   const styles = {
     Present: "bg-green-600 text-white",
@@ -13,8 +14,9 @@ const StatusBadge = ({ status }) => {
 
   return (
     <span
-      className={`px-2 py-1 rounded text-xs font-semibold ${styles[status] || "bg-gray-300 text-gray-800"
-        }`}
+      className={`px-2 py-1 rounded text-xs font-semibold ${
+        styles[status] || "bg-gray-300 text-gray-800"
+      }`}
     >
       {status}
     </span>
@@ -34,7 +36,7 @@ const formatDate = (value) => {
 };
 
 const formatInterval = (val) => {
-  if (!val) return "00:00";
+  if (!val) return "--";
   if (typeof val === "string") return val;
 
   if (typeof val === "object") {
@@ -43,7 +45,7 @@ const formatInterval = (val) => {
     return `${h}:${m}`;
   }
 
-  return "00:00";
+  return "--";
 };
 
 /* ---------- TABLE ---------- */
@@ -57,35 +59,41 @@ const Table = () => {
 
   const data = isAdmin ? adminAttendance : employeeAttendance;
 
-  /* HEADERS BASED ON ROLE */
+  /* HEADERS */
   const headers = isAdmin
     ? [
-      "Sr No",
-      "Device ID",
-      "Employee",
-      "Date",
-      "Status",
-      "Punch In",
-      "Punch Out",
-      "Working Hours",
-      "Expected Hours",
-    ]
+        "Sr No",
+        "Device ID",
+        "Employee",
+        "Date",
+        "Status",
+        "Punch In",
+        "Punch Out",
+        "Working Hours",
+        "Expected Hours",
+      ]
     : [
-      "Date",
-      "Status",
-      "Punch In",
-      "Punch Out",
-      "Working Hours",
-      "Expected Hours",
-    ];
+        "Date",
+        "Status",
+        "Punch In",
+        "Punch Out",
+        "Working Hours",
+        "Expected Hours",
+      ];
 
+  /* LOADING */
   if (loading) {
-    return <div className="p-4 text-center text-gray-500">Loading...</div>;
+    return (
+      <div className="flex items-center justify-center h-[70vh]">
+        <Loader />
+      </div>
+    );
   }
 
+  /* NO DATA */
   if (!data.length) {
     return (
-      <div className="p-4 text-center text-gray-500">
+      <div className="flex items-center justify-center h-[70vh] text-gray-500">
         No attendance data found
       </div>
     );
@@ -97,7 +105,10 @@ const Table = () => {
         <thead className="bg-gray-100 sticky top-0 z-10">
           <tr>
             {headers.map((h, i) => (
-              <th key={i} className="border px-4 py-3 font-semibold text-left">
+              <th
+                key={i}
+                className="border px-4 py-3 font-semibold text-left"
+              >
                 {h}
               </th>
             ))}
@@ -105,73 +116,90 @@ const Table = () => {
         </thead>
 
         <tbody>
-          {data.map((row, i) => (
-            <tr
-              key={i}
-              className={`${i % 2 === 0 ? "bg-white" : "bg-gray-50"
+          {data.map((row, i) => {
+            const isAbsent = row.status === "Absent";
+
+            return (
+              <tr
+                key={i}
+                className={`${
+                  i % 2 === 0 ? "bg-white" : "bg-gray-50"
                 } hover:bg-gray-100`}
-            >
-              {/* -------- ADMIN ROW -------- */}
-              {isAdmin && (
-                <>
-                  <td className="border px-4 py-2">{i + 1}</td>
-                  <td className="border px-4 py-2">
-                    {row.device_user_id || "--"}
-                  </td>
-                  <td className="border px-4 py-2">{row.name}</td>
-                  <td className="border px-4 py-2">
-                    {formatDate(row.attendance_date)}
-                  </td>
-                  <td className="border px-4 py-2">
-                    <StatusBadge status={row.status} />
-                  </td>
-                  <td className="border px-4 py-2">
-                    {formatTime(row.punch_in)}
-                  </td>
-                  <td className="border px-4 py-2">
-                    {row.status === "Absent"
-                      ? "--"
-                      : row.punch_out
+              >
+                {/* ---------- ADMIN ROW ---------- */}
+                {isAdmin && (
+                  <>
+                    <td className="border px-4 py-2">{i + 1}</td>
+                    <td className="border px-4 py-2">
+                      {row.device_user_id || "--"}
+                    </td>
+                    <td className="border px-4 py-2">{row.name}</td>
+                    <td className="border px-4 py-2">
+                      {formatDate(row.attendance_date)}
+                    </td>
+                    <td className="border px-4 py-2">
+                      <StatusBadge status={row.status} />
+                    </td>
+
+                    <td className="border px-4 py-2">
+                      {isAbsent ? "--" : formatTime(row.punch_in)}
+                    </td>
+
+                    <td className="border px-4 py-2">
+                      {isAbsent
+                        ? "--"
+                        : row.punch_out
                         ? formatTime(row.punch_out)
                         : "Working..."}
-                  </td>
+                    </td>
 
-                  <td className="border px-4 py-2">
-                    {formatInterval(row.current_working_hours)}
-                  </td>
-                  <td className="border px-4 py-2">
-                    {formatInterval(row.expected_hours)}
-                  </td>
-                </>
-              )}
+                    <td className="border px-4 py-2">
+                      {isAbsent
+                        ? "--"
+                        : formatInterval(row.current_working_hours)}
+                    </td>
 
-              {/* -------- EMPLOYEE ROW -------- */}
-              {!isAdmin && (
-                <>
-                  <td className="border px-4 py-2">
-                    {formatDate(row.attendance_date)}
-                  </td>
-                  <td className="border px-4 py-2">
-                    <StatusBadge status={row.status} />
-                  </td>
-                  <td className="border px-4 py-2">
-                    {formatTime(row.punch_in)}
-                  </td>
-                  <td className="border px-4 py-2">
-                    {row.punch_out
-                      ? formatTime(row.punch_out)
-                      : "Working..."}
-                  </td>
-                  <td className="border px-4 py-2">
-                    {formatInterval(row.current_working_hours)}
-                  </td>
-                  <td className="border px-4 py-2">
-                    {formatInterval(row.expected_hours)}
-                  </td>
-                </>
-              )}
-            </tr>
-          ))}
+                    <td className="border px-4 py-2">
+                      {isAbsent ? "--" : "9.2"}
+                    </td>
+                  </>
+                )}
+
+                {/* ---------- EMPLOYEE ROW ---------- */}
+                {!isAdmin && (
+                  <>
+                    <td className="border px-4 py-2">
+                      {formatDate(row.attendance_date)}
+                    </td>
+
+                    <td className="border px-4 py-2">
+                      <StatusBadge status={row.status} />
+                    </td>
+
+                    <td className="border px-4 py-2">
+                      {isAbsent ? "--" : formatTime(row.punch_in)}
+                    </td>
+
+                    <td className="border px-4 py-2">
+                      {isAbsent
+                        ? "--"
+                        : row.punch_out
+                        ? formatTime(row.punch_out)
+                        : "Working..."}
+                    </td>
+
+                    <td className="border px-4 py-2">
+                      {isAbsent ? "--" : formatInterval(row.total_hours)}
+                    </td>
+
+                    <td className="border px-4 py-2">
+                      {isAbsent ? "--" : "9.2"}
+                    </td>
+                  </>
+                )}
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>

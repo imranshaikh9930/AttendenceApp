@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { NavLink,useNavigate } from "react-router-dom";
 import { loginUser } from "../../services/authServices";
-
+import {toast} from "react-hot-toast";
 const Login = () => {
   const navigate = useNavigate();
 
@@ -19,23 +19,30 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     try {
       const resp = await loginUser(formData);
-      alert(resp.message);
-      console.log("User:", resp.user.role);
-
-      if(resp.user.role === "employee"){
+  
+      // 🔐 Save auth
+      localStorage.setItem("token", resp.token);
+      localStorage.setItem("user", JSON.stringify(resp.user));
+  
+      // 🔥 VERY IMPORTANT — notify context
+      window.dispatchEvent(new Event("storage"));
+  
+      toast.success("Login Successfully");
+  
+      if (resp.user.role === "employee") {
         navigate("/employee");
-      }
-      else{
-        navigate("/admin")
+      } else {
+        navigate("/admin");
       }
     } catch (err) {
-      console.log(err);
-      alert(err.response?.data?.message || "Login failed");
+      console.error(err);
+      toast.error(err.response?.data?.message || "Login failed");
     }
   };
+  
 
   return (
     <section className="bg-gray-50 min-h-screen flex items-center justify-center">
@@ -86,12 +93,12 @@ const Login = () => {
           </button>
 
           {/* Footer */}
-          <p className="text-sm text-center text-gray-500">
+          {/* <p className="text-sm text-center text-gray-500">
             Don’t have an account yet?{" "}
             <NavLink to="/register" className="text-blue-600 hover:underline">
               Sign up
             </NavLink>
-          </p>
+          </p> */}
         </form>
       </div>
     </section>

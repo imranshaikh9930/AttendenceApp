@@ -12,6 +12,7 @@ router.get("/sync", controller.syncAttendance);
 router.get("/today", controller.getTodayOrganizationAttendance);
 
 
-router.get("/me", auth, controller.getMyAttendance);
+// Optional
+// router.get("/me", auth, controller.getMyAttendance);
 
 module.exports = router;
